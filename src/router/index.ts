@@ -19,7 +19,7 @@ const router = createRouter({
             component: LoginPage,
         },
         {
-            path: '/register',
+            path: '/admin/register',
             name: 'register',
             component: RegisterPage,
         },
