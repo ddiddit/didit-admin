@@ -34,6 +34,7 @@ const handleSubmit = async () => {
     emit('close')
   } catch (error: unknown) {
     const problem = (error as any)?.response?.data as ProblemDetail | undefined
+
     errorMessage.value = problem?.detail || '초대에 실패했습니다.'
   } finally {
     isLoading.value = false
