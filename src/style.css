@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: #3DDB99;
+    --color-primary-dark: #37C58A;
+    --color-primary-light: #C3F4DF;
+}
+
+@layer base {
+    body {
+        font-family: sans-serif;
+        background-color: #f9fafb;
+    }
+}
+
+@utility text-title-1 {
+    font-size: 28px;
+    line-height: 138%;
+    font-weight: 700;
+}
+
+@utility text-title-2 {
+    font-size: 24px;
+    line-height: 140%;
+    font-weight: 600;
+}
+
+@utility text-heading {
+    font-size: 20px;
+    line-height: 140%;
+    font-weight: 600;
+}
+
+@utility text-body {
+    font-size: 16px;
+    line-height: 150%;
+}
+
+@utility text-label {
+    font-size: 14px;
+    line-height: 140%;
+}
