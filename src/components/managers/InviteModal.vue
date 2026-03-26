@@ -2,8 +2,8 @@
 import { ref, reactive } from 'vue'
 import { X } from 'lucide-vue-next'
 import { adminApi } from '@/api/admin.api'
-import type { AdminPosition, ProblemDetail } from '@/types/admin'
-import type { ProblemDetail as ApiProblemDetail } from '@/types/api'
+import type { AdminPosition } from '@/types/admin'
+import type { ProblemDetail } from '@/types/api'
 
 const emit = defineEmits<{
   close: []
@@ -33,7 +33,7 @@ const handleSubmit = async () => {
     emit('invited')
     emit('close')
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ApiProblemDetail | undefined
+    const problem = (error as any)?.response?.data as ProblemDetail | undefined
     errorMessage.value = problem?.detail || '초대에 실패했습니다.'
   } finally {
     isLoading.value = false
