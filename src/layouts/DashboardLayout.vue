@@ -27,6 +27,7 @@ const pageTitle = computed(() => {
     '/notices': '공지사항',
     '/inquiries': '문의사항',
     '/managers': '관리자 관리',
+    '/settings': '앱 설정',
   }
   return map[route.path] ?? ''
 })
@@ -117,6 +118,13 @@ const closeSidebar = () => {
                 active-class="bg-primary/10 text-primary font-medium"
             >
               관리자 관리
+            </RouterLink>
+            <RouterLink
+                to="/settings"
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-base text-neutral-600 hover:bg-neutral-100 transition"
+                active-class="bg-primary/10 text-primary font-medium"
+            >
+              앱 설정
             </RouterLink>
           </div>
         </div>
@@ -217,6 +225,14 @@ const closeSidebar = () => {
                 @click="closeSidebar"
             >
               관리자 관리
+            </RouterLink>
+            <RouterLink
+                to="/settings"
+                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-base text-neutral-600 hover:bg-neutral-100 transition"
+                active-class="bg-primary/10 text-primary font-medium"
+                @click="closeSidebar"
+            >
+              앱 설정
             </RouterLink>
           </div>
         </div>

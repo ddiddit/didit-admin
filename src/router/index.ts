@@ -4,6 +4,8 @@ import NoticesPage from '@/views/notices/NoticesPage.vue'
 import InquiriesPage from '@/views/inquiries/InquiriesPage.vue'
 import ManagersPage from '@/views/managers/ManagersPage.vue'
 import RegisterPage from '@/views/register/RegisterPage.vue'
+import SettingsPage from '@/views/settings/SettingsPage.vue'
+
 import { tokenStorage } from '@/utils/token'
 
 const router = createRouter({
@@ -39,6 +41,12 @@ const router = createRouter({
             path: '/managers',
             name: 'managers',
             component: ManagersPage,
+            meta: { requiresAuth: true, requiresSuperAdmin: true },
+        },
+        {
+            path: '/settings',
+            name: 'settings',
+            component: SettingsPage,
             meta: { requiresAuth: true, requiresSuperAdmin: true },
         },
     ],
