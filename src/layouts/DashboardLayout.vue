@@ -124,7 +124,7 @@ const closeSidebar = () => {
 
       <!-- 프로필 + 로그아웃 -->
       <div class="px-4 py-4 border-t border-neutral-200 space-y-3">
-        <div class="flex items-center gap-3 px-2">
+        <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <component :is="positionIcon" class="w-4 h-4 text-primary" />
           </div>
@@ -224,7 +224,7 @@ const closeSidebar = () => {
 
       <!-- 프로필 + 로그아웃 -->
       <div class="px-4 py-4 border-t border-neutral-200 space-y-3">
-        <div class="flex items-center gap-3 px-2">
+        <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <component :is="positionIcon" class="w-4 h-4 text-primary" />
           </div>

@@ -4,6 +4,7 @@ import { X } from 'lucide-vue-next'
 import { adminApi } from '@/api/admin.api'
 import type { AdminPosition } from '@/types/admin'
 import type { ProblemDetail } from '@/types/api'
+import BaseSpinner from '@/components/common/BaseSpinner.vue'
 
 const emit = defineEmits<{
   close: []
@@ -34,7 +35,6 @@ const handleSubmit = async () => {
     emit('close')
   } catch (error: unknown) {
     const problem = (error as any)?.response?.data as ProblemDetail | undefined
-
     errorMessage.value = problem?.detail || '초대에 실패했습니다.'
   } finally {
     isLoading.value = false
@@ -44,6 +44,7 @@ const handleSubmit = async () => {
 
 <template>
   <Teleport to="body">
+    <BaseSpinner :show="isLoading" />
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" @click.self="emit('close')">
       <div class="w-full max-w-md bg-white rounded-2xl shadow-lg">
 
@@ -109,7 +110,7 @@ const handleSubmit = async () => {
                 :disabled="!form.email || !form.position || isLoading"
                 class="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-dark transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {{ isLoading ? '초대 중...' : '초대하기' }}
+              초대하기
             </button>
           </div>
         </form>
