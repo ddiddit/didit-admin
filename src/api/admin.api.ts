@@ -4,7 +4,7 @@ import type { Admin, InviteRequest } from '@/types/admin'
 
 export const adminApi = {
     list() {
-        return client.get<ApiResponse<Admin[]>>('/')
+        return client.get<ApiResponse<Admin[]>>('')
     },
 
     invite(payload: InviteRequest) {
