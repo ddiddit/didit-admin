@@ -21,7 +21,7 @@ interface Inquiry {
 
 const router = useRouter()
 const route = useRoute()
-const id = route.params.id as string
+const _id = route.params.id as string
 
 const inquiry = ref<Inquiry | null>(null)
 const isLoading = ref(false)
