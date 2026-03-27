@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { ChevronLeft } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
@@ -20,7 +20,6 @@ interface Inquiry {
 }
 
 const router = useRouter()
-const route = useRoute()
 
 const inquiry = ref<Inquiry | null>(null)
 const isLoading = ref(false)
@@ -28,9 +27,10 @@ const isSubmitting = ref(false)
 const answerContent = ref('')
 
 const fetchInquiry = async () => {
-  const id = route.params.id as string
   isLoading.value = true
   try {
+    // const route = useRoute()
+    // const id = route.params.id as string
     // const response = await inquiriesApi.get(id)
     // inquiry.value = response.data.data
     // answerContent.value = inquiry.value.answer ?? ''
@@ -44,13 +44,14 @@ const fetchInquiry = async () => {
 }
 
 const handleSubmitAnswer = async () => {
-  const id = route.params.id as string
   if (!answerContent.value.trim()) {
     toast.error('답변 내용을 입력해주세요.')
     return
   }
   isSubmitting.value = true
   try {
+    // const route = useRoute()
+    // const id = route.params.id as string
     // await inquiriesApi.answer(id, { content: answerContent.value })
     toast.success('답변이 등록되었습니다.')
     await fetchInquiry()
