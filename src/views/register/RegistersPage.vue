@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { adminApi } from '@/api/admin.api'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
@@ -15,7 +16,6 @@ const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 const isLoading = ref(false)
-const errorMessage = ref('')
 
 const isFormValid = computed(() =>
     email.value.trim() !== '' &&
@@ -36,7 +36,6 @@ onMounted(() => {
 const handleSubmit = async () => {
   if (!isFormValid.value || isLoading.value || !token.value) return
   isLoading.value = true
-  errorMessage.value = ''
   try {
     await adminApi.register(token.value, {
       email: email.value.trim(),
@@ -45,7 +44,7 @@ const handleSubmit = async () => {
     await router.push('/login')
   } catch (error: unknown) {
     const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    errorMessage.value = problem?.detail || '계정 생성에 실패했습니다.'
+    toast.error(problem?.detail || '계정 생성에 실패했습니다.')
   } finally {
     isLoading.value = false
   }
@@ -104,20 +103,16 @@ const handleSubmit = async () => {
                 placeholder="비밀번호를 다시 입력해주세요"
                 autocomplete="new-password"
                 :class="[
-                                'w-full rounded-xl border bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition',
-                                passwordMismatch
-                                    ? 'border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100'
-                                    : 'border-neutral-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
-                            ]"
+                  'w-full rounded-xl border bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition',
+                  passwordMismatch
+                    ? 'border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100'
+                    : 'border-neutral-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
+                ]"
             />
             <p v-if="passwordMismatch" class="mt-1.5 text-xs text-red-500">
               비밀번호가 일치하지 않습니다.
             </p>
           </div>
-
-          <p v-if="errorMessage" class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-500">
-            {{ errorMessage }}
-          </p>
 
           <BaseButton type="submit" :disabled="!isFormValid || isLoading">
             계정 생성
