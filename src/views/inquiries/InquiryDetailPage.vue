@@ -1,4 +1,4 @@
-v<script setup lang="ts">
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -21,7 +21,6 @@ interface Inquiry {
 
 const router = useRouter()
 const route = useRoute()
-const _id = route.params.id as string
 
 const inquiry = ref<Inquiry | null>(null)
 const isLoading = ref(false)
@@ -29,6 +28,7 @@ const isSubmitting = ref(false)
 const answerContent = ref('')
 
 const fetchInquiry = async () => {
+  const id = route.params.id as string
   isLoading.value = true
   try {
     // const response = await inquiriesApi.get(id)
@@ -44,6 +44,7 @@ const fetchInquiry = async () => {
 }
 
 const handleSubmitAnswer = async () => {
+  const id = route.params.id as string
   if (!answerContent.value.trim()) {
     toast.error('답변 내용을 입력해주세요.')
     return
