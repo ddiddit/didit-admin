@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { toast } from 'vue-sonner'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { settingsApi } from '@/api/settings.api'
 import BaseButton from '@/components/common/BaseButton.vue'
@@ -11,8 +12,6 @@ const maintenanceMessage = ref('')
 const minimumVersion = ref('')
 const isLoading = ref(false)
 const isSaving = ref(false)
-const successMessage = ref('')
-const errorMessage = ref('')
 
 onMounted(async () => {
   isLoading.value = true
@@ -22,7 +21,7 @@ onMounted(async () => {
     maintenanceMessage.value = data.maintenanceMessage ?? ''
     minimumVersion.value = data.minimumVersion
   } catch {
-    errorMessage.value = '설정을 불러오지 못했습니다.'
+    toast.error('설정을 불러오지 못했습니다.')
   } finally {
     isLoading.value = false
   }
@@ -30,18 +29,16 @@ onMounted(async () => {
 
 const handleSave = async () => {
   isSaving.value = true
-  successMessage.value = ''
-  errorMessage.value = ''
   try {
     await settingsApi.updateAppConfig({
       maintenanceMode: maintenanceMode.value,
       maintenanceMessage: maintenanceMessage.value || null,
       minimumVersion: minimumVersion.value,
     })
-    successMessage.value = '저장되었습니다.'
+    toast.success('저장되었습니다.')
   } catch (error: unknown) {
     const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    errorMessage.value = problem?.detail || '저장에 실패했습니다.'
+    toast.error(problem?.detail || '저장에 실패했습니다.')
   } finally {
     isSaving.value = false
   }
@@ -52,8 +49,8 @@ const handleSave = async () => {
   <DashboardLayout>
     <BaseSpinner :show="isLoading || isSaving" />
 
-    <div class="flex min-h-full items-center justify-center">
-      <div class="w-full max-w-xl space-y-5">
+    <div class="flex min-h-full justify-center pt-10">
+      <div class="w-full max-w-2xl space-y-5">
 
         <!-- 헤더 -->
         <div>
@@ -114,22 +111,10 @@ const handleSave = async () => {
           </div>
         </div>
 
-        <!-- 에러 -->
-        <p v-if="errorMessage" class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-500">
-          {{ errorMessage }}
-        </p>
-
         <!-- 저장 버튼 -->
-        <div class="flex items-center gap-4">
-          <div class="w-full">
-            <BaseButton type="button" :disabled="isSaving" @click="handleSave">
-              {{ isSaving ? '저장 중' : '저장' }}
-            </BaseButton>
-          </div>
-          <p v-if="successMessage" class="text-sm text-primary font-medium whitespace-nowrap">
-            {{ successMessage }}
-          </p>
-        </div>
+        <BaseButton type="button" :disabled="isSaving" @click="handleSave">
+          {{ isSaving ? '저장 중' : '저장' }}
+        </BaseButton>
 
       </div>
     </div>

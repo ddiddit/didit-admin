@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { toast } from 'vue-sonner'
 import { X } from 'lucide-vue-next'
 import { adminApi } from '@/api/admin.api'
 import type { AdminPosition } from '@/types/admin'
@@ -23,19 +24,17 @@ const form = reactive({
 })
 
 const isLoading = ref(false)
-const errorMessage = ref('')
 
 const handleSubmit = async () => {
   if (!form.email || !form.position) return
   isLoading.value = true
-  errorMessage.value = ''
   try {
     await adminApi.invite({ email: form.email, position: form.position })
     emit('invited')
     emit('close')
   } catch (error: unknown) {
     const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    errorMessage.value = problem?.detail || '초대에 실패했습니다.'
+    toast.error(problem?.detail || '초대에 실패했습니다.')
   } finally {
     isLoading.value = false
   }
@@ -80,21 +79,16 @@ const handleSubmit = async () => {
                   type="button"
                   @click="form.position = pos.value"
                   :class="[
-                                    'rounded-xl py-2.5 text-sm font-medium border transition cursor-pointer',
-                                    form.position === pos.value
-                                        ? 'bg-primary/10 border-primary text-primary'
-                                        : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50'
-                                ]"
+                    'rounded-xl py-2.5 text-sm font-medium border transition cursor-pointer',
+                    form.position === pos.value
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50'
+                  ]"
               >
                 {{ pos.label }}
               </button>
             </div>
           </div>
-
-          <!-- 에러 -->
-          <p v-if="errorMessage" class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-500">
-            {{ errorMessage }}
-          </p>
 
           <!-- 버튼 -->
           <div class="flex gap-2 pt-1">

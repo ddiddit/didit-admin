@@ -2,9 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/views/auth/LoginPage.vue'
 import NoticesPage from '@/views/notices/NoticesPage.vue'
 import InquiriesPage from '@/views/inquiries/InquiriesPage.vue'
+import InquiryDetailPage from '@/views/inquiries/InquiryDetailPage.vue'
 import ManagersPage from '@/views/managers/ManagersPage.vue'
-import RegisterPage from '@/views/register/RegisterPage.vue'
+import RegisterPage from '@/views/register/RegistersPage.vue'
 import SettingsPage from '@/views/settings/SettingsPage.vue'
+import NotificationsPage from '@/views/notifications/NotificationsPage.vue'
+
 
 import { tokenStorage } from '@/utils/token'
 
@@ -38,6 +41,12 @@ const router = createRouter({
             meta: { requiresAuth: true },
         },
         {
+            path: '/inquiries/:id',
+            name: 'inquiry-detail',
+            component: InquiryDetailPage,
+            meta: { requiresAuth: true },
+        },
+        {
             path: '/managers',
             name: 'managers',
             component: ManagersPage,
@@ -48,6 +57,12 @@ const router = createRouter({
             name: 'settings',
             component: SettingsPage,
             meta: { requiresAuth: true, requiresSuperAdmin: true },
+        },
+        {
+            path: '/notifications',
+            name: 'notifications',
+            component: NotificationsPage,
+            meta: { requiresAuth: true },
         },
     ],
 })
