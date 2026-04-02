@@ -16,10 +16,10 @@ export const inquiriesApi = {
     },
 
     updateAnswer(inquiryId: string, payload: InquiryAnswerRequest) {
-        return client.patch<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}/answer`, payload) // PATCH
+        return client.patch<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}/answer`, payload)
     },
 
-    delete(inquiryId: string) {
-        return client.delete(`/inquiries/${inquiryId}`)
+    deleteAnswer(inquiryId: string) {
+        return client.delete<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}/answer`)
     },
 }
