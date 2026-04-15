@@ -12,14 +12,14 @@ export const inquiriesApi = {
     },
 
     answer(inquiryId: string, payload: InquiryAnswerRequest) {
-        return client.post<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}/answer`, payload)
+        return client.post<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}`, payload)
     },
 
     updateAnswer(inquiryId: string, payload: InquiryAnswerRequest) {
-        return client.patch<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}/answer`, payload) // PATCH
+        return client.patch<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}`, payload)
     },
 
-    delete(inquiryId: string) {
-        return client.delete(`/inquiries/${inquiryId}`)
+    deleteAnswer(inquiryId: string) {
+        return client.delete<ApiResponse<InquiryDetail>>(`/inquiries/${inquiryId}`)
     },
 }
