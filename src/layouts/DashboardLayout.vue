@@ -71,7 +71,10 @@ const closeSidebar = () => {
         class="w-64 flex-shrink-0 flex flex-col border-r border-neutral-200 bg-white"
     >
       <div class="px-4 border-b border-neutral-200 flex items-center h-16">
-        <img src="@/assets/logo.png" alt="didit" class="h-7" />
+        <div class="flex items-center gap-2">
+          <img src="@/assets/logo.png" alt="didit" class="h-7" />
+          <span class="text-base font-semibold text-neutral-800">관리자</span>
+        </div>
       </div>
 
       <nav class="flex-1 px-3 py-4 space-y-4">
@@ -124,7 +127,10 @@ const closeSidebar = () => {
 
       <!-- 모바일 헤더 -->
       <header v-if="!isDesktop" class="h-14 border-b border-neutral-200 bg-white px-4 flex items-center justify-between">
-        <img src="@/assets/logo.png" alt="didit" class="h-7" />
+        <div class="flex items-center gap-2">
+          <img src="@/assets/logo.png" alt="didit" class="h-7" />
+          <span class="text-base font-semibold text-neutral-800">관리자</span>
+        </div>
         <button class="text-neutral-500 hover:text-neutral-700 cursor-pointer" @click="isSidebarOpen = true">
           <Menu class="w-5 h-5" />
         </button>
@@ -144,7 +150,10 @@ const closeSidebar = () => {
         ]"
     >
       <div class="px-5 border-b border-neutral-200 flex items-center justify-between h-16">
-        <img src="@/assets/logo.png" alt="didit" class="h-7" />
+        <div class="flex items-center gap-2">
+          <img src="@/assets/logo.png" alt="didit" class="h-7" />
+          <span class="text-base font-semibold text-neutral-800">관리자</span>
+        </div>
         <button class="text-neutral-400 hover:text-neutral-600 cursor-pointer" @click="closeSidebar">
           <X class="w-5 h-5" />
         </button>
