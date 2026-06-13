@@ -22,6 +22,23 @@ client.interceptors.request.use((config) => {
     return config
 })
 
+// 동시에 여러 요청이 401을 받아도 재발급은 한 번만 수행하고, 나머지는 그 결과를 기다린다.
+// (각자 재발급하면 회전된 refresh token 탓에 뒤따르는 요청들이 무효 토큰으로 실패해 강제 로그아웃됨)
+let isRefreshing = false
+let refreshSubscribers: Array<(token: string | null) => void> = []
+
+function onRefreshResolved(token: string | null) {
+    refreshSubscribers.forEach((callback) => callback(token))
+    refreshSubscribers = []
+}
+
+function redirectToLogin() {
+    tokenStorage.clearTokens()
+    if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+    }
+}
+
 client.interceptors.response.use(
     (response) => response,
     async (error: AxiosError<ProblemDetail>) => {
@@ -37,12 +54,27 @@ client.interceptors.response.use(
 
         const refreshToken = tokenStorage.getRefreshToken()
         if (!refreshToken) {
-            tokenStorage.clearTokens()
-            window.location.href = '/login'
+            redirectToLogin()
             return Promise.reject(error)
         }
 
         originalRequest._retry = true
+
+        // 이미 재발급이 진행 중이면 새 토큰을 기다렸다가 원래 요청을 재시도한다
+        if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+                refreshSubscribers.push((token) => {
+                    if (!token) {
+                        reject(error)
+                        return
+                    }
+                    originalRequest.headers.Authorization = `Bearer ${token}`
+                    resolve(client(originalRequest))
+                })
+            })
+        }
+
+        isRefreshing = true
 
         try {
             const response = await axios.post<ApiResponse<AuthTokenResponse>>(
@@ -53,13 +85,16 @@ client.interceptors.response.use(
 
             const { accessToken, refreshToken: newRefreshToken } = response.data.data
             tokenStorage.setTokens(accessToken, newRefreshToken)
+            onRefreshResolved(accessToken)
             originalRequest.headers.Authorization = `Bearer ${accessToken}`
 
             return client(originalRequest)
         } catch (refreshError) {
-            tokenStorage.clearTokens()
-            window.location.href = '/login'
+            onRefreshResolved(null)
+            redirectToLogin()
             return Promise.reject(refreshError)
+        } finally {
+            isRefreshing = false
         }
     },
 )
