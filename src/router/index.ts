@@ -62,15 +62,17 @@ const router = createRouter({
             path: '/notifications',
             name: 'notifications',
             component: NotificationsPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, requiresSuperAdmin: true },
         },
     ],
 })
 
 router.beforeEach((to, _from, next) => {
-    const token = tokenStorage.getAccessToken()
+    const isAuthenticated = tokenStorage.isAuthenticated()
 
-    if (to.meta.requiresAuth && !token) {
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        // 만료/잔존 토큰을 정리해 다음 진입에서 다시 튕기지 않도록 한다
+        tokenStorage.clearTokens()
         next('/login')
         return
     }
@@ -80,7 +82,7 @@ router.beforeEach((to, _from, next) => {
         return
     }
 
-    if (to.path === '/login' && token) {
+    if (to.path === '/login' && isAuthenticated) {
         next('/notices')
         return
     }

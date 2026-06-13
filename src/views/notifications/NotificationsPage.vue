@@ -5,13 +5,19 @@ import { X } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
+import { notificationsApi } from '@/api/notifications.api'
+import type { ProblemDetail } from '@/types/api'
 
 type TargetType = 'all' | 'specific'
 type SendType = 'push' | 'email' | 'both'
 
+// 백엔드(notice-emails)가 현재 지원하는 범위. 미지원 옵션은 UI에서 비활성화한다.
+const SUPPORTED_TARGETS: TargetType[] = ['all']
+const SUPPORTED_SEND_TYPES: SendType[] = ['email']
+
 const isSending = ref(false)
 const targetType = ref<TargetType>('all')
-const sendType = ref<SendType>('push')
+const sendType = ref<SendType>('email')
 const title = ref('')
 const body = ref('')
 
@@ -50,21 +56,31 @@ const handleSend = async () => {
     toast.error('제목과 내용을 입력해주세요.')
     return
   }
-  if (targetType.value === 'specific' && emailList.value.length === 0) {
-    toast.error('발송 대상 이메일을 입력해주세요.')
+  if (!SUPPORTED_SEND_TYPES.includes(sendType.value)) {
+    toast.error('현재 이메일 발송만 지원됩니다.')
+    return
+  }
+  if (!SUPPORTED_TARGETS.includes(targetType.value)) {
+    toast.error('현재 전체 사용자 발송만 지원됩니다.')
     return
   }
 
   isSending.value = true
   try {
-    // await notificationApi.send({ ... })
+    await notificationsApi.sendNoticeEmail({
+      targetType: 'ALL',
+      userIds: [],
+      subject: title.value.trim(),
+      body: body.value.trim(),
+    })
     toast.success('알림이 발송되었습니다.')
     title.value = ''
     body.value = ''
     emailList.value = []
     emailInput.value = ''
-  } catch {
-    toast.error('알림 발송에 실패했습니다.')
+  } catch (error: unknown) {
+    const problem = (error as any)?.response?.data as ProblemDetail | undefined
+    toast.error(problem?.detail || '알림 발송에 실패했습니다.')
   } finally {
     isSending.value = false
   }
@@ -81,7 +97,7 @@ const handleSend = async () => {
         <!-- 헤더 -->
         <div>
           <h2 class="text-lg font-semibold text-neutral-900">알림 발송</h2>
-          <p class="mt-0.5 text-sm text-neutral-400">푸시 알림 및 이메일을 발송합니다.</p>
+          <p class="mt-0.5 text-sm text-neutral-400">전체 사용자에게 이메일을 발송합니다.</p>
         </div>
 
         <!-- 발송 대상 -->
@@ -95,15 +111,19 @@ const handleSend = async () => {
                 ]"
                 :key="item.value"
                 type="button"
+                :disabled="!SUPPORTED_TARGETS.includes(item.value as TargetType)"
                 @click="targetType = item.value as TargetType"
                 :class="[
-                  'rounded-xl py-2.5 text-sm font-medium border transition cursor-pointer',
-                  targetType === item.value
-                    ? 'bg-primary/10 border-primary text-primary'
-                    : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50'
+                  'rounded-xl py-2.5 text-sm font-medium border transition',
+                  !SUPPORTED_TARGETS.includes(item.value as TargetType)
+                    ? 'bg-neutral-50 border-neutral-200 text-neutral-300 cursor-not-allowed'
+                    : targetType === item.value
+                      ? 'bg-primary/10 border-primary text-primary cursor-pointer'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50 cursor-pointer'
                 ]"
             >
               {{ item.label }}
+              <span v-if="!SUPPORTED_TARGETS.includes(item.value as TargetType)" class="ml-1 text-xs">(준비 중)</span>
             </button>
           </div>
 
@@ -157,12 +177,15 @@ const handleSend = async () => {
                 ]"
                 :key="item.value"
                 type="button"
+                :disabled="!SUPPORTED_SEND_TYPES.includes(item.value as SendType)"
                 @click="sendType = item.value as SendType"
                 :class="[
-                  'rounded-xl py-2.5 text-sm font-medium border transition cursor-pointer',
-                  sendType === item.value
-                    ? 'bg-primary/10 border-primary text-primary'
-                    : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50'
+                  'rounded-xl py-2.5 text-sm font-medium border transition',
+                  !SUPPORTED_SEND_TYPES.includes(item.value as SendType)
+                    ? 'bg-neutral-50 border-neutral-200 text-neutral-300 cursor-not-allowed'
+                    : sendType === item.value
+                      ? 'bg-primary/10 border-primary text-primary cursor-pointer'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50 cursor-pointer'
                 ]"
             >
               {{ item.label }}
