@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/views/auth/LoginPage.vue'
+import DashboardPage from '@/views/dashboard/DashboardPage.vue'
 import NoticesPage from '@/views/notices/NoticesPage.vue'
 import InquiriesPage from '@/views/inquiries/InquiriesPage.vue'
 import InquiryDetailPage from '@/views/inquiries/InquiryDetailPage.vue'
@@ -9,7 +10,9 @@ import SettingsPage from '@/views/settings/SettingsPage.vue'
 import NotificationsPage from '@/views/notifications/NotificationsPage.vue'
 import UsersPage from '@/views/users/UsersPage.vue'
 import UserDetailPage from '@/views/users/UserDetailPage.vue'
-
+import BadgesPage from '@/views/badges/BadgesPage.vue'
+import PromptsPage from '@/views/prompts/PromptsPage.vue'
+import PromptEditPage from '@/views/prompts/PromptEditPage.vue'
 
 import { tokenStorage } from '@/utils/token'
 
@@ -18,7 +21,13 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: '/login',
+            redirect: '/dashboard',
+        },
+        {
+            path: '/dashboard',
+            name: 'dashboard',
+            component: DashboardPage,
+            meta: { requiresAuth: true },
         },
         {
             path: '/login',
@@ -78,6 +87,24 @@ const router = createRouter({
             component: UserDetailPage,
             meta: { requiresAuth: true },
         },
+        {
+            path: '/badges',
+            name: 'badges',
+            component: BadgesPage,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/prompts',
+            name: 'prompts',
+            component: PromptsPage,
+            meta: { requiresAuth: true, requiresSuperAdmin: true },
+        },
+        {
+            path: '/prompts/:id',
+            name: 'prompt-edit',
+            component: PromptEditPage,
+            meta: { requiresAuth: true, requiresSuperAdmin: true },
+        },
     ],
 })
 
@@ -92,12 +119,12 @@ router.beforeEach((to, _from, next) => {
     }
 
     if (to.meta.requiresSuperAdmin && !tokenStorage.isSuperAdmin()) {
-        next('/notices')
+        next('/dashboard')
         return
     }
 
     if (to.path === '/login' && isAuthenticated) {
-        next('/notices')
+        next('/dashboard')
         return
     }
 
