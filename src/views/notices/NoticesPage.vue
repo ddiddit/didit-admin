@@ -53,7 +53,6 @@ const openCreate = () => {
 const openEdit = async (notice: Notice) => {
   isEdit.value = true
   selectedNotice.value = notice
-  // 수정 시 상세 조회로 content 가져오기
   try {
     const response = await noticesApi.get(notice.id)
     const detail = response.data.data
@@ -124,11 +123,8 @@ const handleDelete = async () => {
   }
 }
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('ko-KR', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-  })
-}
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
 
 onMounted(fetchNotices)
 </script>
@@ -142,104 +138,76 @@ onMounted(fetchNotices)
       <!-- 헤더 -->
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-semibold text-neutral-900">공지사항</h2>
-          <p class="mt-0.5 text-sm text-neutral-400">총 {{ notices.length }}개</p>
+          <h2 class="text-heading2 font-semibold text-grey-13">공지사항</h2>
+          <p class="mt-0.5 text-label1 text-grey-7">총 {{ notices.length }}개</p>
         </div>
         <button
-            @click="openCreate"
-            class="flex items-center gap-2 rounded-xl bg-primary px-4 h-[50px] text-sm font-semibold text-white hover:bg-primary-dark transition cursor-pointer"
+          @click="openCreate"
+          class="flex items-center gap-2 rounded-xl bg-primary px-4 h-[44px] text-label1 font-semibold text-white hover:bg-green-hover transition cursor-pointer"
         >
           <Plus class="w-4 h-4" />
           공지 등록
         </button>
       </div>
 
-      <!-- 테이블 (sm 이상) -->
-      <div class="hidden sm:block overflow-hidden rounded-2xl bg-white border border-neutral-200">
+      <!-- 테이블 -->
+      <div class="overflow-hidden rounded-2xl bg-surface border border-grey-5">
         <table class="w-full text-sm table-fixed">
           <colgroup>
-            <col class="w-[35%]" />
+            <col class="w-[40%]" />
             <col class="w-[15%]" />
             <col class="w-[20%]" />
+            <col class="w-[10%]" />
             <col class="w-[15%]" />
           </colgroup>
           <thead>
-          <tr class="border-b border-neutral-200 bg-neutral-50">
-            <th class="px-5 py-3.5 text-left text-xs font-semibold text-neutral-500">제목</th>
-            <th class="px-5 py-3.5 text-center text-xs font-semibold text-neutral-500">상태</th>
-            <th class="px-5 py-3.5 text-center text-xs font-semibold text-neutral-500">등록일</th>
-            <th class="px-5 py-3.5 text-center text-xs font-semibold text-neutral-500">액션</th>
-          </tr>
+            <tr class="border-b border-grey-5 bg-grey-3">
+              <th class="px-5 py-3.5 text-left text-caption1 font-semibold text-grey-7">제목</th>
+              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">상태</th>
+              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">발송</th>
+              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">등록일</th>
+              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">액션</th>
+            </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100">
-          <tr v-if="notices.length === 0">
-            <td colspan="4" class="py-16 text-center text-sm text-neutral-400">
-              등록된 공지사항이 없습니다.
-            </td>
-          </tr>
-          <tr
+          <tbody class="divide-y divide-grey-4">
+            <tr v-if="notices.length === 0">
+              <td colspan="5" class="py-16 text-center text-label1 text-grey-7">
+                등록된 공지사항이 없습니다.
+              </td>
+            </tr>
+            <tr
               v-for="notice in notices"
               :key="notice.id"
-              class="hover:bg-neutral-50 transition cursor-pointer"
+              class="hover:bg-grey-3 transition cursor-pointer"
               @click="openEdit(notice)"
-          >
-            <td class="px-5 py-4 text-neutral-900">
-              <span class="block truncate">{{ notice.title }}</span>
-            </td>
-            <td class="px-5 py-4 text-center">
-                <span
-                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                    :class="notice.status === 'PUBLISHED' ? 'bg-green-50 text-green-600' : 'bg-neutral-100 text-neutral-500'"
-                >
+            >
+              <td class="px-5 py-4 text-label1 text-grey-13">
+                <span class="block truncate">{{ notice.title }}</span>
+              </td>
+              <td class="px-5 py-4 text-center">
+                <span :class="notice.status === 'PUBLISHED' ? 'badge-green' : 'badge-grey'">
                   {{ notice.status === 'PUBLISHED' ? '게시' : '임시저장' }}
                 </span>
-            </td>
-            <td class="px-5 py-4 text-center text-neutral-500">
-              {{ formatDate(notice.createdAt) }}
-            </td>
-            <td class="px-5 py-4 text-center" @click.stop>
-              <button
+              </td>
+              <td class="px-5 py-4 text-center text-caption1 text-grey-7">
+                <span v-if="notice.sendPush" class="mr-1">푸시</span>
+                <span v-if="notice.sendEmail">이메일</span>
+                <span v-if="!notice.sendPush && !notice.sendEmail">-</span>
+              </td>
+              <td class="px-5 py-4 text-center text-caption1 text-grey-7">
+                {{ formatDate(notice.createdAt) }}
+              </td>
+              <td class="px-5 py-4 text-center" @click.stop>
+                <button
                   @click="openDelete(notice)"
-                  class="rounded-lg bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-500 hover:bg-red-50 hover:text-red-500 transition cursor-pointer"
-              >
-                삭제
-              </button>
-            </td>
-          </tr>
+                  class="rounded-lg bg-grey-4 px-3 py-1.5 text-caption1 font-medium text-grey-7 hover:bg-danger/10 hover:text-danger transition cursor-pointer"
+                >
+                  삭제
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
-      </div>
-
-      <!-- 카드 (sm 미만) -->
-      <div class="sm:hidden space-y-3">
-        <p v-if="notices.length === 0" class="py-16 text-center text-sm text-neutral-400">
-          등록된 공지사항이 없습니다.
-        </p>
-        <div
-            v-for="notice in notices"
-            :key="notice.id"
-            class="bg-white rounded-2xl border border-neutral-200 px-4 py-4 space-y-3 cursor-pointer"
-            @click="openEdit(notice)"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <span class="text-sm font-medium text-neutral-900 truncate">{{ notice.title }}</span>
-            <span
-                class="flex-shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                :class="notice.status === 'PUBLISHED' ? 'bg-green-50 text-green-600' : 'bg-neutral-100 text-neutral-500'"
-            >
-              {{ notice.status === 'PUBLISHED' ? '게시' : '임시저장' }}
-            </span>
-          </div>
-          <span class="text-xs text-neutral-400">{{ formatDate(notice.createdAt) }}</span>
-          <div class="pt-2 border-t border-neutral-100" @click.stop>
-            <button
-                @click="openDelete(notice)"
-                class="w-full rounded-lg bg-neutral-100 py-1.5 text-xs font-medium text-neutral-500 hover:bg-red-50 hover:text-red-500 transition cursor-pointer"
-            >
-              삭제
-            </button>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -247,69 +215,62 @@ onMounted(fetchNotices)
     <!-- 작성/수정 모달 -->
     <Teleport to="body">
       <div
-          v-if="showFormModal"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4"
-          @click.self="showFormModal = false"
+        v-if="showFormModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4"
+        @click.self="showFormModal = false"
       >
-        <div class="w-full max-w-lg bg-white rounded-2xl shadow-lg overflow-visible">
+        <div class="w-full max-w-lg bg-surface rounded-2xl shadow-card overflow-visible">
 
-          <div class="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
-            <h3 class="text-base font-semibold text-neutral-900">
+          <div class="flex items-center justify-between px-6 py-5 border-b border-grey-5">
+            <h3 class="text-body3 font-semibold text-grey-13">
               {{ isEdit ? '공지사항 수정' : '공지사항 등록' }}
             </h3>
-            <button @click="showFormModal = false" class="text-neutral-400 hover:text-neutral-600 cursor-pointer">
+            <button @click="showFormModal = false" class="text-grey-6 hover:text-grey-9 cursor-pointer transition">
               <Plus class="w-5 h-5 rotate-45" />
             </button>
           </div>
 
           <div class="px-6 py-5 space-y-4 overflow-visible">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700">제목</label>
+              <label class="mb-1.5 block text-label1 font-medium text-grey-9">제목</label>
               <input
-                  v-model="formTitle"
-                  type="text"
-                  placeholder="공지사항 제목을 입력해주세요"
-                  class="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                v-model="formTitle"
+                type="text"
+                placeholder="공지사항 제목을 입력해주세요"
+                class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 font-medium text-grey-13 placeholder:text-grey-7 placeholder:font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700">내용</label>
+              <label class="mb-1.5 block text-label1 font-medium text-grey-9">내용</label>
               <textarea
-                  v-model="formContent"
-                  placeholder="공지사항 내용을 입력해주세요"
-                  rows="6"
-                  class="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                v-model="formContent"
+                placeholder="공지사항 내용을 입력해주세요"
+                rows="6"
+                class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 font-medium text-grey-13 placeholder:text-grey-7 placeholder:font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
               />
             </div>
 
             <!-- 상태 -->
             <div class="relative">
-              <label class="mb-1.5 block text-sm font-medium text-neutral-700">상태</label>
+              <label class="mb-1.5 block text-label1 font-medium text-grey-9">상태</label>
               <button
-                  type="button"
-                  @click="showStatusDropdown = !showStatusDropdown"
-                  class="flex w-full items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                type="button"
+                @click="showStatusDropdown = !showStatusDropdown"
+                class="flex w-full items-center justify-between rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 font-medium text-grey-13 transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               >
                 <span>{{ formStatus === 'PUBLISHED' ? '게시' : '임시저장' }}</span>
-                <svg
-                    class="w-4 h-4 text-neutral-400 transition-transform"
-                    :class="showStatusDropdown ? 'rotate-180' : ''"
-                    fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                >
+                <svg class="w-4 h-4 text-grey-7 transition-transform" :class="showStatusDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <div
-                  v-if="showStatusDropdown"
-                  class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-neutral-200 bg-white shadow-lg overflow-hidden"
-              >
+              <div v-if="showStatusDropdown" class="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-grey-5 bg-surface shadow-card overflow-hidden">
                 <button
-                    v-for="opt in [{ value: 'PUBLISHED', label: '게시' }, { value: 'DRAFT', label: '임시저장' }]"
-                    :key="opt.value"
-                    type="button"
-                    @click="formStatus = opt.value as NoticeStatus; showStatusDropdown = false"
-                    class="flex w-full items-center justify-between px-4 py-2.5 text-sm transition hover:bg-neutral-50"
-                    :class="formStatus === opt.value ? 'text-primary font-medium' : 'text-neutral-700'"
+                  v-for="opt in [{ value: 'PUBLISHED', label: '게시' }, { value: 'DRAFT', label: '임시저장' }]"
+                  :key="opt.value"
+                  type="button"
+                  @click="formStatus = opt.value as NoticeStatus; showStatusDropdown = false"
+                  class="flex w-full items-center justify-between px-4 py-2.5 text-label1 transition hover:bg-grey-3"
+                  :class="formStatus === opt.value ? 'text-primary font-semibold' : 'text-grey-9'"
                 >
                   {{ opt.label }}
                   <svg v-if="formStatus === opt.value" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -321,43 +282,24 @@ onMounted(fetchNotices)
 
             <!-- 발송 채널 -->
             <div>
-              <label class="mb-2 block text-sm font-medium text-neutral-700">발송 채널</label>
+              <label class="mb-2 block text-label1 font-medium text-grey-9">발송 채널</label>
               <div class="flex items-center gap-5">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input
-                      id="sendPush"
-                      v-model="formSendPush"
-                      type="checkbox"
-                      class="h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
-                  />
-                  <span class="text-sm text-neutral-700">푸시 알림</span>
+                  <input v-model="formSendPush" type="checkbox" class="h-4 w-4 rounded border-grey-5 text-primary focus:ring-primary accent-primary" />
+                  <span class="text-label1 text-grey-9">푸시 알림</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input
-                      id="sendEmail"
-                      v-model="formSendEmail"
-                      type="checkbox"
-                      class="h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
-                  />
-                  <span class="text-sm text-neutral-700">이메일</span>
+                  <input v-model="formSendEmail" type="checkbox" class="h-4 w-4 rounded border-grey-5 text-primary focus:ring-primary accent-primary" />
+                  <span class="text-label1 text-grey-9">이메일</span>
                 </label>
               </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-2 pt-1">
-              <button
-                  type="button"
-                  @click="showFormModal = false"
-                  class="flex-1 rounded-xl border border-neutral-200 py-2.5 text-sm font-medium text-neutral-500 hover:bg-neutral-50 transition cursor-pointer"
-              >
+            <div class="flex gap-2 pt-1">
+              <button type="button" @click="showFormModal = false" class="flex-1 rounded-xl border border-grey-5 py-2.5 text-label1 font-medium text-grey-7 hover:bg-grey-3 transition cursor-pointer">
                 취소
               </button>
-              <button
-                  type="button"
-                  :disabled="isSubmitting"
-                  @click="handleSubmit"
-                  class="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-dark transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              >
+              <button type="button" :disabled="isSubmitting" @click="handleSubmit" class="flex-1 rounded-xl bg-primary py-2.5 text-label1 font-semibold text-white hover:bg-green-hover transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                 {{ isEdit ? '수정' : '등록' }}
               </button>
             </div>
@@ -367,16 +309,15 @@ onMounted(fetchNotices)
       </div>
     </Teleport>
 
-    <!-- 삭제 다이얼로그 -->
     <ConfirmDialog
-        v-if="showDeleteDialog"
-        title="공지사항 삭제"
-        :description="`'${selectedNotice?.title}' 공지사항을 삭제하시겠습니까?`"
-        confirm-text="삭제"
-        confirm-class="bg-red-500 hover:bg-red-400"
-        :is-loading="isDeleting"
-        @close="showDeleteDialog = false"
-        @confirm="handleDelete"
+      v-if="showDeleteDialog"
+      title="공지사항 삭제"
+      :description="`'${selectedNotice?.title}'\n공지사항을 삭제하시겠습니까?`"
+      confirm-text="삭제"
+      :is-danger="true"
+      :is-loading="isDeleting"
+      @close="showDeleteDialog = false"
+      @confirm="handleDelete"
     />
 
   </DashboardLayout>

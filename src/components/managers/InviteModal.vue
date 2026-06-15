@@ -45,12 +45,12 @@ const handleSubmit = async () => {
   <Teleport to="body">
     <BaseSpinner :show="isLoading" />
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" @click.self="emit('close')">
-      <div class="w-full max-w-md bg-white rounded-2xl shadow-lg">
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-card">
 
         <!-- 헤더 -->
-        <div class="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
-          <h3 class="text-base font-semibold text-neutral-900">관리자 초대</h3>
-          <button @click="emit('close')" class="text-neutral-400 hover:text-neutral-600 cursor-pointer">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-grey-5">
+          <h3 class="text-body3 font-semibold text-grey-13">관리자 초대</h3>
+          <button @click="emit('close')" class="text-grey-6 hover:text-grey-9 cursor-pointer transition">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -60,30 +60,30 @@ const handleSubmit = async () => {
 
           <!-- 이메일 -->
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-neutral-700">이메일</label>
+            <label class="mb-1.5 block text-label1 font-medium text-grey-9">이메일</label>
             <input
-                v-model="form.email"
-                type="email"
-                placeholder="초대할 이메일을 입력해주세요"
-                class="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              v-model="form.email"
+              type="email"
+              placeholder="초대할 이메일을 입력해주세요"
+              class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 font-medium text-grey-13 placeholder:text-grey-7 placeholder:font-normal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <!-- 직군 -->
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-neutral-700">직군</label>
+            <label class="mb-1.5 block text-label1 font-medium text-grey-9">직군</label>
             <div class="grid grid-cols-3 gap-2">
               <button
-                  v-for="pos in positions"
-                  :key="pos.value"
-                  type="button"
-                  @click="form.position = pos.value"
-                  :class="[
-                    'rounded-xl py-2.5 text-sm font-medium border transition cursor-pointer',
-                    form.position === pos.value
-                      ? 'bg-primary/10 border-primary text-primary'
-                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:border-primary/50'
-                  ]"
+                v-for="pos in positions"
+                :key="pos.value"
+                type="button"
+                @click="form.position = pos.value"
+                :class="[
+                  'rounded-xl py-2.5 text-label1 font-medium border transition cursor-pointer',
+                  form.position === pos.value
+                    ? 'bg-green-light border-primary text-green-dark font-semibold'
+                    : 'bg-grey-3 border-grey-5 text-grey-8 hover:border-primary/50'
+                ]"
               >
                 {{ pos.label }}
               </button>
@@ -93,16 +93,16 @@ const handleSubmit = async () => {
           <!-- 버튼 -->
           <div class="flex gap-2 pt-1">
             <button
-                type="button"
-                @click="emit('close')"
-                class="flex-1 rounded-xl border border-neutral-200 py-2.5 text-sm font-medium text-neutral-500 hover:bg-neutral-50 transition cursor-pointer"
+              type="button"
+              @click="emit('close')"
+              class="flex-1 rounded-xl border border-grey-5 py-2.5 text-label1 font-medium text-grey-7 hover:bg-grey-3 transition cursor-pointer"
             >
               취소
             </button>
             <button
-                type="submit"
-                :disabled="!form.email || !form.position || isLoading"
-                class="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-dark transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              type="submit"
+              :disabled="!form.email || !form.position || isLoading"
+              class="flex-1 rounded-xl bg-primary py-2.5 text-label1 font-semibold text-white hover:bg-green-hover transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               초대하기
             </button>

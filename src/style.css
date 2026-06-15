@@ -1,42 +1,87 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css');
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #3DDB99;
-    --color-primary-dark: #37C58A;
-    --color-primary-light: #C3F4DF;
+  /* Primary (Green) */
+  --color-primary:            #3DDB99;
+  --color-green-light:        #ECFBF5;
+  --color-green-light-hover:  #E2FAF0;
+  --color-green-light-active: #C3F4DF;
+  --color-green:              #3DDB99;
+  --color-green-hover:        #37C58A;
+  --color-green-active:       #31AF7A;
+  --color-green-dark:         #2EA473;
+  --color-green-dark-hover:   #25835C;
+  --color-green-dark-active:  #1B6345;
+  --color-green-darker:       #154D36;
+
+  /* Grey (Neutral) */
+  --color-grey-1:  #FFFFFF;
+  --color-grey-2:  #FDFDFD;
+  --color-grey-3:  #F6F6F6;
+  --color-grey-4:  #F1F1F1;
+  --color-grey-5:  #E6E6E6;
+  --color-grey-6:  #C6C6C6;
+  --color-grey-7:  #989898;
+  --color-grey-8:  #6A6A6A;
+  --color-grey-9:  #575757;
+  --color-grey-10: #3C3C3C;
+  --color-grey-11: #353535;
+  --color-grey-12: #2B2B2B;
+  --color-grey-13: #191919;
+
+  /* System */
+  --color-danger:    #F73838;
+  --color-danger-50: #FF5C5C;
+  --color-accent:    #FF6E58;
+
+  /* Semantic aliases */
+  --color-surface:    #FFFFFF;
+  --color-background: #F6F6F6;
+
+  /* Font */
+  --font-sans: 'Pretendard', system-ui, sans-serif;
+
+  /* Shadow */
+  --shadow-card:   0 2px 12px rgba(0,0,0,0.06);
 }
 
 @layer base {
-    body {
-        font-family: sans-serif;
-        background-color: #f9fafb;
-    }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    font-family: 'Pretendard', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-grey-13);
+  }
 }
 
-@utility text-title-1 {
-    font-size: 28px;
-    line-height: 138%;
-    font-weight: 700;
+@layer components {
+  /* 배지 */
+  .badge-green  { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-green-light text-green-dark; }
+  .badge-grey   { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-grey-4 text-grey-8; }
+  .badge-yellow { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-[#FFF9E6] text-[#B07D00]; }
+  .badge-red    { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-danger/10 text-danger; }
 }
 
-@utility text-title-2 {
-    font-size: 24px;
-    line-height: 140%;
-    font-weight: 600;
-}
-
-@utility text-heading {
-    font-size: 20px;
-    line-height: 140%;
-    font-weight: 600;
-}
-
-@utility text-body {
-    font-size: 16px;
-    line-height: 150%;
-}
-
-@utility text-label {
-    font-size: 14px;
-    line-height: 140%;
+@layer utilities {
+  /* 타이포그래피 — 프론트엔드와 동일한 스케일 */
+  .text-title1   { font-size: 28px; line-height: 1.38; letter-spacing: -0.02em; }
+  .text-title2   { font-size: 24px; line-height: 1.40; letter-spacing: -0.02em; }
+  .text-title3   { font-size: 22px; line-height: 1.40; letter-spacing: -0.02em; }
+  .text-heading1 { font-size: 20px; line-height: 1.40; letter-spacing: -0.02em; }
+  .text-heading2 { font-size: 18px; line-height: 1.40; letter-spacing: -0.02em; }
+  .text-body1    { font-size: 17px; line-height: 1.50; letter-spacing: -0.02em; }
+  .text-body2    { font-size: 16px; line-height: 1.50; letter-spacing: -0.02em; }
+  .text-body3    { font-size: 15px; line-height: 1.50; letter-spacing: -0.02em; }
+  .text-label1   { font-size: 14px; line-height: 1.40; letter-spacing: -0.02em; }
+  .text-label2   { font-size: 13px; line-height: 1.40; letter-spacing: -0.02em; }
+  .text-caption1 { font-size: 12px; line-height: 1.36; letter-spacing: -0.02em; }
+  .text-caption2 { font-size: 11px; line-height: 1.30; letter-spacing: -0.02em; }
 }
