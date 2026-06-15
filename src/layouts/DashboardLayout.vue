@@ -3,7 +3,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   PenSquare, Palette, Code2, User, Menu, X,
-  Bell, FileText, MessageSquare, Users, Settings,
+  Bell, FileText, MessageSquare, Users, Settings, LayoutDashboard, Award, SlidersHorizontal,
 } from 'lucide-vue-next'
 import { authApi } from '@/api/auth.api'
 import { tokenStorage } from '@/utils/token'
@@ -72,7 +72,21 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         <img src="@/assets/logo.png" alt="didit" class="h-7" />
       </div>
 
-      <nav class="flex-1 px-3 py-5 space-y-6">
+      <nav class="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
+        <!-- 홈 -->
+        <div>
+          <div class="space-y-0.5">
+            <RouterLink
+              to="/dashboard"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <LayoutDashboard class="w-4 h-4 flex-shrink-0" />
+              대시보드
+            </RouterLink>
+          </div>
+        </div>
+
         <!-- 운영 -->
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">운영</p>
@@ -104,7 +118,7 @@ const closeSidebar = () => { isSidebarOpen.value = false }
           </div>
         </div>
 
-        <!-- 사용자 (ADMIN 이상) -->
+        <!-- 사용자 -->
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">사용자</p>
           <div class="space-y-0.5">
@@ -116,6 +130,14 @@ const closeSidebar = () => { isSidebarOpen.value = false }
               <Users class="w-4 h-4 flex-shrink-0" />
               유저 관리
             </RouterLink>
+            <RouterLink
+              to="/badges"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <Award class="w-4 h-4 flex-shrink-0" />
+              배지 관리
+            </RouterLink>
           </div>
         </div>
 
@@ -123,6 +145,14 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         <div v-if="isSuperAdmin">
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
           <div class="space-y-0.5">
+            <RouterLink
+              to="/prompts"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />
+              프롬프트 관리
+            </RouterLink>
             <RouterLink
               to="/managers"
               class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
@@ -194,7 +224,14 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         </button>
       </div>
 
-      <nav class="flex-1 px-3 py-5 space-y-6">
+      <nav class="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
+        <div>
+          <div class="space-y-0.5">
+            <RouterLink to="/dashboard" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <LayoutDashboard class="w-4 h-4 flex-shrink-0" /> 대시보드
+            </RouterLink>
+          </div>
+        </div>
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">운영</p>
           <div class="space-y-0.5">
@@ -215,11 +252,17 @@ const closeSidebar = () => { isSidebarOpen.value = false }
             <RouterLink to="/users" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
               <Users class="w-4 h-4 flex-shrink-0" /> 유저 관리
             </RouterLink>
+            <RouterLink to="/badges" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <Award class="w-4 h-4 flex-shrink-0" /> 배지 관리
+            </RouterLink>
           </div>
         </div>
         <div v-if="isSuperAdmin">
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
           <div class="space-y-0.5">
+            <RouterLink to="/prompts" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <SlidersHorizontal class="w-4 h-4 flex-shrink-0" /> 프롬프트 관리
+            </RouterLink>
             <RouterLink to="/managers" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
               <User class="w-4 h-4 flex-shrink-0" /> 관리자 관리
             </RouterLink>
