@@ -5,7 +5,6 @@ export interface Notice {
     title: string
     status: NoticeStatus
     sendPush: boolean
-    sendEmail: boolean
     createdAt: string
 }
 
@@ -19,5 +18,4 @@ export interface NoticeRequest {
     content: string
     status: NoticeStatus
     sendPush: boolean
-    sendEmail: boolean
 }

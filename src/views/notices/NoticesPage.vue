@@ -21,8 +21,6 @@ const selectedNotice = ref<Notice | null>(null)
 const formTitle = ref('')
 const formContent = ref('')
 const formStatus = ref<NoticeStatus>('PUBLISHED')
-const formSendPush = ref(false)
-const formSendEmail = ref(false)
 const isEdit = ref(false)
 const showStatusDropdown = ref(false)
 
@@ -44,8 +42,6 @@ const openCreate = () => {
   formTitle.value = ''
   formContent.value = ''
   formStatus.value = 'PUBLISHED'
-  formSendPush.value = false
-  formSendEmail.value = false
   showStatusDropdown.value = false
   showFormModal.value = true
 }
@@ -59,14 +55,10 @@ const openEdit = async (notice: Notice) => {
     formTitle.value = detail.title
     formContent.value = detail.content
     formStatus.value = detail.status
-    formSendPush.value = detail.sendPush
-    formSendEmail.value = detail.sendEmail
   } catch {
     formTitle.value = notice.title
     formContent.value = ''
     formStatus.value = notice.status
-    formSendPush.value = notice.sendPush
-    formSendEmail.value = notice.sendEmail ?? false
   }
   showFormModal.value = true
 }
@@ -87,8 +79,8 @@ const handleSubmit = async () => {
       title: formTitle.value,
       content: formContent.value,
       status: formStatus.value,
-      sendPush: formSendPush.value,
-      sendEmail: formSendEmail.value,
+      // 백엔드 필수 필드. 푸시 발송은 미구현이라 항상 false 전송.
+      sendPush: false,
     }
     if (isEdit.value) {
       await noticesApi.update(selectedNotice.value!.id, payload)
@@ -277,21 +269,6 @@ onMounted(fetchNotices)
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </button>
-              </div>
-            </div>
-
-            <!-- 발송 채널 -->
-            <div>
-              <label class="mb-2 block text-label1 font-medium text-grey-9">발송 채널</label>
-              <div class="flex items-center gap-5">
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input v-model="formSendPush" type="checkbox" class="h-4 w-4 rounded border-grey-5 text-primary focus:ring-primary accent-primary" />
-                  <span class="text-label1 text-grey-9">푸시 알림</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input v-model="formSendEmail" type="checkbox" class="h-4 w-4 rounded border-grey-5 text-primary focus:ring-primary accent-primary" />
-                  <span class="text-label1 text-grey-9">이메일</span>
-                </label>
               </div>
             </div>
 

@@ -9,6 +9,17 @@ function decodeJwt(token: string): { sub: string; role: string; position?: strin
     }
 }
 
+// 만료 임박 토큰을 미리 만료로 간주하기 위한 여유 시간(초)
+const EXPIRY_LEEWAY_SECONDS = 10
+
+function isTokenValid(token: string | null): boolean {
+    if (!token) return false
+    const payload = decodeJwt(token)
+    // JWT가 아닌 불투명 토큰은 만료를 알 수 없으므로 서버 판단에 맡긴다
+    if (!payload || typeof payload.exp !== 'number') return true
+    return payload.exp - EXPIRY_LEEWAY_SECONDS > Date.now() / 1000
+}
+
 export const tokenStorage = {
     getAccessToken() {
         return localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -42,5 +53,18 @@ export const tokenStorage = {
 
     isSuperAdmin(): boolean {
         return this.getRole() === 'SUPER_ADMIN'
+    },
+
+    isAccessTokenValid(): boolean {
+        return isTokenValid(this.getAccessToken())
+    },
+
+    isRefreshTokenValid(): boolean {
+        return isTokenValid(this.getRefreshToken())
+    },
+
+    // 유효한 액세스 토큰이 있거나, 재발급에 쓸 유효한 리프레시 토큰이 있으면 인증된 것으로 본다
+    isAuthenticated(): boolean {
+        return this.isAccessTokenValid() || this.isRefreshTokenValid()
     },
 }
