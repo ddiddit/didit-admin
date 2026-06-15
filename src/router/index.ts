@@ -7,6 +7,8 @@ import ManagersPage from '@/views/managers/ManagersPage.vue'
 import RegisterPage from '@/views/register/RegistersPage.vue'
 import SettingsPage from '@/views/settings/SettingsPage.vue'
 import NotificationsPage from '@/views/notifications/NotificationsPage.vue'
+import UsersPage from '@/views/users/UsersPage.vue'
+import UserDetailPage from '@/views/users/UserDetailPage.vue'
 
 
 import { tokenStorage } from '@/utils/token'
@@ -63,6 +65,18 @@ const router = createRouter({
             name: 'notifications',
             component: NotificationsPage,
             meta: { requiresAuth: true, requiresSuperAdmin: true },
+        },
+        {
+            path: '/users',
+            name: 'users',
+            component: UsersPage,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/users/:id',
+            name: 'user-detail',
+            component: UserDetailPage,
+            meta: { requiresAuth: true },
         },
     ],
 })

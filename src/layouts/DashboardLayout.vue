@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { PenSquare, Palette, Code2, User, Menu, X } from 'lucide-vue-next'
+import {
+  PenSquare, Palette, Code2, User, Menu, X,
+  Bell, FileText, MessageSquare, Users, Settings,
+} from 'lucide-vue-next'
 import { authApi } from '@/api/auth.api'
 import { tokenStorage } from '@/utils/token'
 
@@ -48,75 +51,113 @@ const handleLogout = async () => {
   }
 }
 
-const closeSidebar = () => {
-  isSidebarOpen.value = false
-}
+const closeSidebar = () => { isSidebarOpen.value = false }
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-neutral-50">
+  <div class="flex min-h-screen bg-background">
 
     <!-- 모바일 오버레이 -->
     <Transition name="fade">
       <div
-          v-if="isSidebarOpen && !isDesktop"
-          class="fixed inset-0 z-20 bg-black/30"
-          @click="closeSidebar"
+        v-if="isSidebarOpen && !isDesktop"
+        class="fixed inset-0 z-20 bg-black/30"
+        @click="closeSidebar"
       />
     </Transition>
 
     <!-- 데스크탑 사이드바 -->
-    <aside
-        v-if="isDesktop"
-        class="w-64 flex-shrink-0 flex flex-col border-r border-neutral-200 bg-white"
-    >
-      <div class="px-4 border-b border-neutral-200 flex items-center h-16">
-        <div class="flex items-center gap-2">
-          <img src="@/assets/logo.png" alt="didit" class="h-7" />
-          <span class="text-base font-semibold text-neutral-800">관리자</span>
-        </div>
+    <aside v-if="isDesktop" class="w-64 flex-shrink-0 flex flex-col border-r border-grey-5 bg-surface">
+      <div class="px-5 h-16 border-b border-grey-5 flex items-center">
+        <img src="@/assets/logo.png" alt="didit" class="h-7" />
       </div>
 
-      <nav class="flex-1 px-3 py-4 space-y-4">
+      <nav class="flex-1 px-3 py-5 space-y-6">
+        <!-- 운영 -->
         <div>
-          <p class="mb-2 px-3 text-sm font-semibold text-neutral-500">고객지원</p>
-          <div class="space-y-1 pl-3">
-            <RouterLink to="/notices" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium">
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">운영</p>
+          <div class="space-y-0.5">
+            <RouterLink
+              to="/notices"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <FileText class="w-4 h-4 flex-shrink-0" />
               공지사항
             </RouterLink>
-            <RouterLink to="/inquiries" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium">
+            <RouterLink
+              to="/inquiries"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <MessageSquare class="w-4 h-4 flex-shrink-0" />
               문의사항
             </RouterLink>
-            <RouterLink to="/notifications" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium">
+            <RouterLink
+              to="/notifications"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <Bell class="w-4 h-4 flex-shrink-0" />
               알림 발송
             </RouterLink>
           </div>
         </div>
 
+        <!-- 사용자 (ADMIN 이상) -->
+        <div>
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">사용자</p>
+          <div class="space-y-0.5">
+            <RouterLink
+              to="/users"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <Users class="w-4 h-4 flex-shrink-0" />
+              유저 관리
+            </RouterLink>
+          </div>
+        </div>
+
+        <!-- 관리 (SUPER_ADMIN 전용) -->
         <div v-if="isSuperAdmin">
-          <p class="mb-2 px-3 text-sm font-semibold text-neutral-500">관리</p>
-          <div class="space-y-1 pl-3">
-            <RouterLink to="/managers" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium">
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
+          <div class="space-y-0.5">
+            <RouterLink
+              to="/managers"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <User class="w-4 h-4 flex-shrink-0" />
               관리자 관리
             </RouterLink>
-            <RouterLink to="/settings" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium">
+            <RouterLink
+              to="/settings"
+              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
+              active-class="bg-green-light text-green-dark font-semibold"
+            >
+              <Settings class="w-4 h-4 flex-shrink-0" />
               앱 설정
             </RouterLink>
           </div>
         </div>
       </nav>
 
-      <div class="px-4 py-4 border-t border-neutral-200 space-y-3">
+      <!-- 프로필 + 로그아웃 -->
+      <div class="px-4 py-4 border-t border-grey-5 space-y-3">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <component :is="positionIcon" class="w-4 h-4 text-primary" />
+          <div class="w-9 h-9 rounded-xl bg-green-light flex items-center justify-center flex-shrink-0">
+            <component :is="positionIcon" class="w-4 h-4 text-green-dark" />
           </div>
           <div>
-            <p class="text-sm font-medium text-neutral-800">{{ positionLabel }}</p>
-            <p class="text-xs text-neutral-400">{{ role }}</p>
+            <p class="text-label1 font-semibold text-grey-13">{{ positionLabel }}</p>
+            <p class="text-caption1 text-grey-7">{{ role }}</p>
           </div>
         </div>
-        <button @click="handleLogout" class="w-full flex items-center justify-center rounded-xl py-2 text-sm text-neutral-500 hover:bg-red-50 hover:text-red-500 transition border border-neutral-200 cursor-pointer">
+        <button
+          @click="handleLogout"
+          class="w-full flex items-center justify-center rounded-xl py-2 text-label1 text-grey-7 hover:bg-danger/10 hover:text-danger transition border border-grey-5 cursor-pointer"
+        >
           로그아웃
         </button>
       </div>
@@ -126,12 +167,9 @@ const closeSidebar = () => {
     <div class="flex-1 flex flex-col min-w-0">
 
       <!-- 모바일 헤더 -->
-      <header v-if="!isDesktop" class="h-14 border-b border-neutral-200 bg-white px-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <img src="@/assets/logo.png" alt="didit" class="h-7" />
-          <span class="text-base font-semibold text-neutral-800">관리자</span>
-        </div>
-        <button class="text-neutral-500 hover:text-neutral-700 cursor-pointer" @click="isSidebarOpen = true">
+      <header v-if="!isDesktop" class="h-14 border-b border-grey-5 bg-surface px-4 flex items-center justify-between">
+        <img src="@/assets/logo.png" alt="didit" class="h-7" />
+        <button class="text-grey-7 hover:text-grey-9 cursor-pointer" @click="isSidebarOpen = true">
           <Menu class="w-5 h-5" />
         </button>
       </header>
@@ -143,62 +181,66 @@ const closeSidebar = () => {
 
     <!-- 모바일 사이드바 -->
     <aside
-        v-if="!isDesktop"
-        :class="[
-          'fixed inset-y-0 right-0 z-30 w-64 flex flex-col border-l border-neutral-200 bg-white transition-transform duration-300',
-          isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        ]"
+      v-if="!isDesktop"
+      :class="[
+        'fixed inset-y-0 right-0 z-30 w-64 flex flex-col border-l border-grey-5 bg-surface transition-transform duration-300',
+        isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+      ]"
     >
-      <div class="px-5 border-b border-neutral-200 flex items-center justify-between h-16">
-        <div class="flex items-center gap-2">
-          <img src="@/assets/logo.png" alt="didit" class="h-7" />
-          <span class="text-base font-semibold text-neutral-800">관리자</span>
-        </div>
-        <button class="text-neutral-400 hover:text-neutral-600 cursor-pointer" @click="closeSidebar">
+      <div class="px-5 h-16 border-b border-grey-5 flex items-center justify-between">
+        <img src="@/assets/logo.png" alt="didit" class="h-7" />
+        <button class="text-grey-6 hover:text-grey-9 cursor-pointer" @click="closeSidebar">
           <X class="w-5 h-5" />
         </button>
       </div>
 
-      <nav class="flex-1 px-3 py-4 space-y-4">
+      <nav class="flex-1 px-3 py-5 space-y-6">
         <div>
-          <p class="mb-2 px-3 text-sm font-semibold text-neutral-500">고객지원</p>
-          <div class="space-y-1 pl-3">
-            <RouterLink to="/notices" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium" @click="closeSidebar">
-              공지사항
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">운영</p>
+          <div class="space-y-0.5">
+            <RouterLink to="/notices" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <FileText class="w-4 h-4 flex-shrink-0" /> 공지사항
             </RouterLink>
-            <RouterLink to="/inquiries" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium" @click="closeSidebar">
-              문의사항
+            <RouterLink to="/inquiries" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <MessageSquare class="w-4 h-4 flex-shrink-0" /> 문의사항
             </RouterLink>
-            <RouterLink to="/notifications" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium" @click="closeSidebar">
-              알림 발송
+            <RouterLink to="/notifications" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <Bell class="w-4 h-4 flex-shrink-0" /> 알림 발송
             </RouterLink>
           </div>
         </div>
-
-        <div v-if="isSuperAdmin">
-          <p class="mb-2 px-3 text-sm font-semibold text-neutral-500">관리</p>
-          <div class="space-y-1 pl-3">
-            <RouterLink to="/managers" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium" @click="closeSidebar">
-              관리자 관리
+        <div>
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">사용자</p>
+          <div class="space-y-0.5">
+            <RouterLink to="/users" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <Users class="w-4 h-4 flex-shrink-0" /> 유저 관리
             </RouterLink>
-            <RouterLink to="/settings" class="block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 transition" active-class="bg-primary/10 text-primary font-medium" @click="closeSidebar">
-              앱 설정
+          </div>
+        </div>
+        <div v-if="isSuperAdmin">
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
+          <div class="space-y-0.5">
+            <RouterLink to="/managers" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <User class="w-4 h-4 flex-shrink-0" /> 관리자 관리
+            </RouterLink>
+            <RouterLink to="/settings" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
+              <Settings class="w-4 h-4 flex-shrink-0" /> 앱 설정
             </RouterLink>
           </div>
         </div>
       </nav>
 
-      <div class="px-4 py-4 border-t border-neutral-200 space-y-3">
+      <div class="px-4 py-4 border-t border-grey-5 space-y-3">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <component :is="positionIcon" class="w-4 h-4 text-primary" />
+          <div class="w-9 h-9 rounded-xl bg-green-light flex items-center justify-center flex-shrink-0">
+            <component :is="positionIcon" class="w-4 h-4 text-green-dark" />
           </div>
           <div>
-            <p class="text-sm font-medium text-neutral-800">{{ positionLabel }}</p>
-            <p class="text-xs text-neutral-400">{{ role }}</p>
+            <p class="text-label1 font-semibold text-grey-13">{{ positionLabel }}</p>
+            <p class="text-caption1 text-grey-7">{{ role }}</p>
           </div>
         </div>
-        <button @click="handleLogout" class="w-full flex items-center justify-center rounded-xl py-2 text-sm text-neutral-500 hover:bg-red-50 hover:text-red-500 transition border border-neutral-200 cursor-pointer">
+        <button @click="handleLogout" class="w-full flex items-center justify-center rounded-xl py-2 text-label1 text-grey-7 hover:bg-danger/10 hover:text-danger transition border border-grey-5 cursor-pointer">
           로그아웃
         </button>
       </div>

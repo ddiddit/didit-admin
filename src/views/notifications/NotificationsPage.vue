@@ -46,31 +46,31 @@ const handleSend = async () => {
 
         <!-- 헤더 -->
         <div>
-          <h2 class="text-lg font-semibold text-neutral-900">알림 발송</h2>
-          <p class="mt-0.5 text-sm text-neutral-400">전체 사용자에게 이메일을 발송합니다.</p>
+          <h2 class="text-heading2 font-semibold text-grey-13">알림 발송</h2>
+          <p class="mt-0.5 text-label1 text-grey-7">전체 사용자에게 이메일을 발송합니다.</p>
         </div>
 
         <!-- 내용 -->
-        <div class="bg-white rounded-2xl border border-neutral-200 px-6 py-5 space-y-4">
-          <h3 class="text-sm font-semibold text-neutral-900">내용</h3>
+        <div class="bg-surface rounded-2xl border border-grey-5 px-6 py-5 space-y-4">
+          <h3 class="text-label1 font-semibold text-grey-13">내용</h3>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-neutral-700">제목</label>
+            <label class="mb-1.5 block text-label1 font-medium text-grey-9">제목</label>
             <input
-                v-model="title"
-                type="text"
-                placeholder="이메일 제목을 입력해주세요"
-                class="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              v-model="title"
+              type="text"
+              placeholder="이메일 제목을 입력해주세요"
+              class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-neutral-700">내용</label>
+            <label class="mb-1.5 block text-label1 font-medium text-grey-9">내용</label>
             <textarea
-                v-model="body"
-                placeholder="이메일 내용을 입력해주세요"
-                rows="4"
-                class="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+              v-model="body"
+              placeholder="이메일 내용을 입력해주세요"
+              rows="4"
+              class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
             />
           </div>
         </div>
