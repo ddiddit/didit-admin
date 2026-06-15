@@ -11,14 +11,14 @@ interface UserListParams {
 
 export const usersApi = {
   list(params: UserListParams = {}) {
-    return client.get<ApiResponse<UserPage>>('/api/v1/admin/users', { params })
+    return client.get<ApiResponse<UserPage>>('/users', { params })
   },
 
   get(userId: string) {
-    return client.get<ApiResponse<UserDetail>>(`/api/v1/admin/users/${userId}`)
+    return client.get<ApiResponse<UserDetail>>(`/users/${userId}`)
   },
 
   forceWithdraw(userId: string) {
-    return client.post<void>(`/api/v1/admin/users/${userId}/force-withdraw`)
+    return client.post<void>(`/users/${userId}/force-withdraw`)
   },
 }
