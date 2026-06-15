@@ -182,9 +182,8 @@ onMounted(fetchNotices)
                 </span>
               </td>
               <td class="px-5 py-4 text-center text-caption1 text-grey-7">
-                <span v-if="notice.sendPush" class="mr-1">푸시</span>
-                <span v-if="notice.sendEmail">이메일</span>
-                <span v-if="!notice.sendPush && !notice.sendEmail">-</span>
+                <span v-if="notice.sendPush">푸시</span>
+                <span v-else>-</span>
               </td>
               <td class="px-5 py-4 text-center text-caption1 text-grey-7">
                 {{ formatDate(notice.createdAt) }}
