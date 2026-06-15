@@ -70,18 +70,16 @@
   .badge-red    { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-danger/10 text-danger; }
 }
 
-@layer utilities {
-  /* 타이포그래피 — 프론트엔드와 동일한 스케일 */
-  .text-title1   { font-size: 28px; line-height: 1.38; letter-spacing: -0.02em; }
-  .text-title2   { font-size: 24px; line-height: 1.40; letter-spacing: -0.02em; }
-  .text-title3   { font-size: 22px; line-height: 1.40; letter-spacing: -0.02em; }
-  .text-heading1 { font-size: 20px; line-height: 1.40; letter-spacing: -0.02em; }
-  .text-heading2 { font-size: 18px; line-height: 1.40; letter-spacing: -0.02em; }
-  .text-body1    { font-size: 17px; line-height: 1.50; letter-spacing: -0.02em; }
-  .text-body2    { font-size: 16px; line-height: 1.50; letter-spacing: -0.02em; }
-  .text-body3    { font-size: 15px; line-height: 1.50; letter-spacing: -0.02em; }
-  .text-label1   { font-size: 14px; line-height: 1.40; letter-spacing: -0.02em; }
-  .text-label2   { font-size: 13px; line-height: 1.40; letter-spacing: -0.02em; }
-  .text-caption1 { font-size: 12px; line-height: 1.36; letter-spacing: -0.02em; }
-  .text-caption2 { font-size: 11px; line-height: 1.30; letter-spacing: -0.02em; }
-}
+/* 타이포그래피 — @utility로 등록해야 @apply에서 참조 가능 (Tailwind v4) */
+@utility text-title1   { font-size: 28px; line-height: 1.38; letter-spacing: -0.02em; }
+@utility text-title2   { font-size: 24px; line-height: 1.40; letter-spacing: -0.02em; }
+@utility text-title3   { font-size: 22px; line-height: 1.40; letter-spacing: -0.02em; }
+@utility text-heading1 { font-size: 20px; line-height: 1.40; letter-spacing: -0.02em; }
+@utility text-heading2 { font-size: 18px; line-height: 1.40; letter-spacing: -0.02em; }
+@utility text-body1    { font-size: 17px; line-height: 1.50; letter-spacing: -0.02em; }
+@utility text-body2    { font-size: 16px; line-height: 1.50; letter-spacing: -0.02em; }
+@utility text-body3    { font-size: 15px; line-height: 1.50; letter-spacing: -0.02em; }
+@utility text-label1   { font-size: 14px; line-height: 1.40; letter-spacing: -0.02em; }
+@utility text-label2   { font-size: 13px; line-height: 1.40; letter-spacing: -0.02em; }
+@utility text-caption1 { font-size: 12px; line-height: 1.36; letter-spacing: -0.02em; }
+@utility text-caption2 { font-size: 11px; line-height: 1.30; letter-spacing: -0.02em; }
