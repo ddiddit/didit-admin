@@ -14,11 +14,19 @@ export interface RecentInquiry {
   createdAt: string | null
 }
 
+export interface DailyRetroCount {
+  date: string
+  count: number
+}
+
 export interface DashboardStats {
   totalUsers: number
   newUsersToday: number
   totalRetrospects: number
   unansweredInquiries: number
+  dau: number
+  todayRetrospects: number
+  weeklyRetroTrend: DailyRetroCount[]
   recentUsers: RecentUser[]
   recentInquiries: RecentInquiry[]
 }

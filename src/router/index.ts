@@ -13,6 +13,8 @@ import UserDetailPage from '@/views/users/UserDetailPage.vue'
 import BadgesPage from '@/views/badges/BadgesPage.vue'
 import PromptsPage from '@/views/prompts/PromptsPage.vue'
 import PromptEditPage from '@/views/prompts/PromptEditPage.vue'
+import WithdrawalStatsPage from '@/views/withdrawal/WithdrawalStatsPage.vue'
+import AuditLogsPage from '@/views/audit/AuditLogsPage.vue'
 
 import { tokenStorage } from '@/utils/token'
 
@@ -104,6 +106,18 @@ const router = createRouter({
             name: 'prompt-edit',
             component: PromptEditPage,
             meta: { requiresAuth: true, requiresSuperAdmin: true },
+        },
+        {
+            path: '/withdrawal-stats',
+            name: 'withdrawal-stats',
+            component: WithdrawalStatsPage,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/audit-logs',
+            name: 'audit-logs',
+            component: AuditLogsPage,
+            meta: { requiresAuth: true },
         },
     ],
 })

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import {
   PenSquare, Palette, Code2, User, Menu, X,
   Bell, FileText, MessageSquare, Users, Settings, LayoutDashboard, Award, SlidersHorizontal,
+  BarChart2, ClipboardList,
 } from 'lucide-vue-next'
 import { authApi } from '@/api/auth.api'
 import { tokenStorage } from '@/utils/token'
@@ -34,7 +35,7 @@ const positionLabel = computed(() => {
 })
 
 const positionIcon = computed(() => {
-  const map: Record<string, any> = {
+  const map: Record<string, unknown> = {
     PLANNER: PenSquare,
     DESIGNER: Palette,
     DEVELOPER: Code2,
@@ -52,6 +53,9 @@ const handleLogout = async () => {
 }
 
 const closeSidebar = () => { isSidebarOpen.value = false }
+
+const NAV_LINK = 'flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition'
+const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
 </script>
 
 <template>
@@ -76,11 +80,7 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         <!-- 홈 -->
         <div>
           <div class="space-y-0.5">
-            <RouterLink
-              to="/dashboard"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
+            <RouterLink to="/dashboard" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <LayoutDashboard class="w-4 h-4 flex-shrink-0" />
               대시보드
             </RouterLink>
@@ -91,29 +91,14 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">운영</p>
           <div class="space-y-0.5">
-            <RouterLink
-              to="/notices"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <FileText class="w-4 h-4 flex-shrink-0" />
-              공지사항
+            <RouterLink to="/notices" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <FileText class="w-4 h-4 flex-shrink-0" />공지사항
             </RouterLink>
-            <RouterLink
-              to="/inquiries"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <MessageSquare class="w-4 h-4 flex-shrink-0" />
-              문의사항
+            <RouterLink to="/inquiries" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <MessageSquare class="w-4 h-4 flex-shrink-0" />문의사항
             </RouterLink>
-            <RouterLink
-              to="/notifications"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <Bell class="w-4 h-4 flex-shrink-0" />
-              알림 발송
+            <RouterLink to="/notifications" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <Bell class="w-4 h-4 flex-shrink-0" />알림 발송
             </RouterLink>
           </div>
         </div>
@@ -122,21 +107,24 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">사용자</p>
           <div class="space-y-0.5">
-            <RouterLink
-              to="/users"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <Users class="w-4 h-4 flex-shrink-0" />
-              유저 관리
+            <RouterLink to="/users" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <Users class="w-4 h-4 flex-shrink-0" />유저 관리
             </RouterLink>
-            <RouterLink
-              to="/badges"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <Award class="w-4 h-4 flex-shrink-0" />
-              배지 관리
+            <RouterLink to="/badges" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <Award class="w-4 h-4 flex-shrink-0" />배지 관리
+            </RouterLink>
+            <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
+            </RouterLink>
+          </div>
+        </div>
+
+        <!-- 분석 -->
+        <div>
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">분석</p>
+          <div class="space-y-0.5">
+            <RouterLink to="/audit-logs" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <ClipboardList class="w-4 h-4 flex-shrink-0" />감사 로그
             </RouterLink>
           </div>
         </div>
@@ -145,29 +133,14 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         <div v-if="isSuperAdmin">
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
           <div class="space-y-0.5">
-            <RouterLink
-              to="/prompts"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />
-              프롬프트 관리
+            <RouterLink to="/prompts" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />프롬프트 관리
             </RouterLink>
-            <RouterLink
-              to="/managers"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <User class="w-4 h-4 flex-shrink-0" />
-              관리자 관리
+            <RouterLink to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <User class="w-4 h-4 flex-shrink-0" />관리자 관리
             </RouterLink>
-            <RouterLink
-              to="/settings"
-              class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition"
-              active-class="bg-green-light text-green-dark font-semibold"
-            >
-              <Settings class="w-4 h-4 flex-shrink-0" />
-              앱 설정
+            <RouterLink to="/settings" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <Settings class="w-4 h-4 flex-shrink-0" />앱 설정
             </RouterLink>
           </div>
         </div>
@@ -204,7 +177,7 @@ const closeSidebar = () => { isSidebarOpen.value = false }
         </button>
       </header>
 
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-4 sm:p-6">
         <slot />
       </main>
     </div>
@@ -227,47 +200,58 @@ const closeSidebar = () => { isSidebarOpen.value = false }
       <nav class="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
         <div>
           <div class="space-y-0.5">
-            <RouterLink to="/dashboard" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <LayoutDashboard class="w-4 h-4 flex-shrink-0" /> 대시보드
+            <RouterLink to="/dashboard" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <LayoutDashboard class="w-4 h-4 flex-shrink-0" />대시보드
             </RouterLink>
           </div>
         </div>
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">운영</p>
           <div class="space-y-0.5">
-            <RouterLink to="/notices" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <FileText class="w-4 h-4 flex-shrink-0" /> 공지사항
+            <RouterLink to="/notices" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <FileText class="w-4 h-4 flex-shrink-0" />공지사항
             </RouterLink>
-            <RouterLink to="/inquiries" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <MessageSquare class="w-4 h-4 flex-shrink-0" /> 문의사항
+            <RouterLink to="/inquiries" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <MessageSquare class="w-4 h-4 flex-shrink-0" />문의사항
             </RouterLink>
-            <RouterLink to="/notifications" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <Bell class="w-4 h-4 flex-shrink-0" /> 알림 발송
+            <RouterLink to="/notifications" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <Bell class="w-4 h-4 flex-shrink-0" />알림 발송
             </RouterLink>
           </div>
         </div>
         <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">사용자</p>
           <div class="space-y-0.5">
-            <RouterLink to="/users" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <Users class="w-4 h-4 flex-shrink-0" /> 유저 관리
+            <RouterLink to="/users" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <Users class="w-4 h-4 flex-shrink-0" />유저 관리
             </RouterLink>
-            <RouterLink to="/badges" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <Award class="w-4 h-4 flex-shrink-0" /> 배지 관리
+            <RouterLink to="/badges" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <Award class="w-4 h-4 flex-shrink-0" />배지 관리
+            </RouterLink>
+            <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
+            </RouterLink>
+          </div>
+        </div>
+        <div>
+          <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">분석</p>
+          <div class="space-y-0.5">
+            <RouterLink to="/audit-logs" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <ClipboardList class="w-4 h-4 flex-shrink-0" />감사 로그
             </RouterLink>
           </div>
         </div>
         <div v-if="isSuperAdmin">
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
           <div class="space-y-0.5">
-            <RouterLink to="/prompts" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <SlidersHorizontal class="w-4 h-4 flex-shrink-0" /> 프롬프트 관리
+            <RouterLink to="/prompts" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />프롬프트 관리
             </RouterLink>
-            <RouterLink to="/managers" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <User class="w-4 h-4 flex-shrink-0" /> 관리자 관리
+            <RouterLink to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <User class="w-4 h-4 flex-shrink-0" />관리자 관리
             </RouterLink>
-            <RouterLink to="/settings" class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-label1 text-grey-8 hover:bg-grey-3 transition" active-class="bg-green-light text-green-dark font-semibold" @click="closeSidebar">
-              <Settings class="w-4 h-4 flex-shrink-0" /> 앱 설정
+            <RouterLink to="/settings" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <Settings class="w-4 h-4 flex-shrink-0" />앱 설정
             </RouterLink>
           </div>
         </div>

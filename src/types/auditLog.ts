@@ -1,0 +1,16 @@
+export interface AuditLogItem {
+  action: string
+  actorId: string | null
+  actorType: string | null
+  targetId: string | null
+  targetType: string | null
+  payload: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface AuditLogsPage {
+  content: AuditLogItem[]
+  totalElements: number
+  totalPages: number
+  page: number
+}
