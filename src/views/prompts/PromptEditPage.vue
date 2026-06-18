@@ -73,22 +73,12 @@ onMounted(fetchPrompt)
 
       <template v-if="prompt">
         <!-- 헤더 -->
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <Badge tone="green">{{ typeLabel(prompt.promptType) }}</Badge>
-              <h2 class="text-heading2 font-semibold text-grey-13">{{ jobLabel(prompt.jobType) }} 프롬프트</h2>
-            </div>
-            <p class="mt-1 text-caption1 text-grey-7">마지막 수정: {{ formatDateTime(prompt.updatedAt) }}</p>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <Badge tone="green">{{ typeLabel(prompt.promptType) }}</Badge>
+            <h2 class="text-heading2 font-semibold text-grey-13">{{ jobLabel(prompt.jobType) }} 프롬프트</h2>
           </div>
-          <BaseButton
-            v-if="isSuperAdmin"
-            variant="primary"
-            :disabled="!isDirty"
-            @click="showSaveDialog = true"
-          >
-            저장
-          </BaseButton>
+          <p class="mt-1 text-caption1 text-grey-7">마지막 수정: {{ formatDateTime(prompt.updatedAt) }}</p>
         </div>
 
         <!-- 에디터 -->
@@ -106,7 +96,20 @@ onMounted(fetchPrompt)
           />
         </div>
 
-        <p v-if="!isSuperAdmin" class="text-center text-caption1 text-grey-7">
+        <!-- 저장 버튼 (에디터 하단) -->
+        <BaseButton
+          v-if="isSuperAdmin"
+          variant="primary"
+          size="lg"
+          block
+          :disabled="!isDirty"
+          :loading="isSaving"
+          @click="showSaveDialog = true"
+        >
+          저장
+        </BaseButton>
+
+        <p v-else class="text-center text-caption1 text-grey-7">
           프롬프트 수정은 슈퍼어드민만 가능합니다.
         </p>
       </template>
