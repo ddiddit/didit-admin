@@ -48,7 +48,9 @@ client.interceptors.response.use(
             return Promise.reject(error)
         }
 
-        if (error.response?.status !== 401) {
+        // 백엔드가 만료된 토큰에 401 대신 403을 반환하는 경우도 재발급 시도
+        const status = error.response?.status
+        if (status !== 401 && status !== 403) {
             return Promise.reject(error)
         }
 
