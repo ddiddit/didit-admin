@@ -1,55 +1,76 @@
 <template>
-  <div class="overflow-x-auto rounded-2xl border border-grey-5 bg-surface">
-    <table class="w-full text-sm" :class="minWidth" :style="hasWidths ? 'table-layout: fixed' : ''">
-      <colgroup v-if="hasWidths">
-        <col v-for="col in columns" :key="col.key" :style="col.width ? `width:${col.width}` : ''" />
-      </colgroup>
-      <thead>
-        <tr class="border-b border-grey-5 bg-grey-3">
-          <th
-            v-for="col in columns"
-            :key="col.key"
-            :class="[
-              'px-4 py-3.5 text-caption1 font-semibold text-grey-7',
-              alignClass(col.align),
-              hideClass(col.hideBelow),
-            ]"
+  <div>
+    <!-- 데스크톱: 테이블 (md 이상) -->
+    <div class="hidden overflow-x-auto rounded-2xl border border-grey-5 bg-surface md:block">
+      <table class="w-full text-sm" :class="minWidth" :style="hasWidths ? 'table-layout: fixed' : ''">
+        <colgroup v-if="hasWidths">
+          <col v-for="col in columns" :key="col.key" :style="col.width ? `width:${col.width}` : ''" />
+        </colgroup>
+        <thead>
+          <tr class="border-b border-grey-5 bg-grey-3">
+            <th
+              v-for="col in columns"
+              :key="col.key"
+              :class="['px-4 py-3.5 text-caption1 font-semibold text-grey-7', alignClass(col.align), hideClass(col.hideBelow)]"
+            >
+              {{ col.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-grey-4">
+          <tr v-if="rows.length === 0">
+            <td :colspan="columns.length" class="p-0">
+              <EmptyState v-if="!loading" :message="emptyMessage" :icon="emptyIcon" />
+              <div v-else class="py-16" />
+            </td>
+          </tr>
+          <tr
+            v-for="(row, idx) in rows"
+            :key="rowKeyOf(row, idx)"
+            :class="['transition hover:bg-grey-3', clickable ? 'cursor-pointer' : '']"
+            @click="clickable && emit('row-click', row)"
           >
-            {{ col.label }}
-          </th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-grey-4">
-        <!-- 빈 상태 -->
-        <tr v-if="rows.length === 0">
-          <td :colspan="columns.length" class="p-0">
-            <EmptyState v-if="!loading" :message="emptyMessage" :icon="emptyIcon" />
-            <div v-else class="py-16" />
-          </td>
-        </tr>
-        <!-- 데이터 행 -->
-        <tr
-          v-for="(row, idx) in rows"
-          :key="rowKeyOf(row, idx)"
-          :class="['transition', clickable ? 'cursor-pointer hover:bg-grey-3' : 'hover:bg-grey-3']"
-          @click="clickable && emit('row-click', row)"
-        >
-          <td
-            v-for="col in columns"
-            :key="col.key"
-            :class="[
-              'px-4 py-4 text-label1 text-grey-13',
-              alignClass(col.align),
-              hideClass(col.hideBelow),
-            ]"
-          >
+            <td
+              v-for="col in columns"
+              :key="col.key"
+              :class="['px-4 py-4 text-label1 text-grey-13', alignClass(col.align), hideClass(col.hideBelow)]"
+            >
+              <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">
+                {{ row[col.key] ?? '-' }}
+              </slot>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 모바일: 카드 (md 미만) -->
+    <div class="space-y-3 md:hidden">
+      <template v-if="rows.length === 0">
+        <div v-if="loading" class="py-16" />
+        <div v-else class="rounded-2xl border border-grey-5 bg-surface">
+          <EmptyState :message="emptyMessage" :icon="emptyIcon" />
+        </div>
+      </template>
+      <div
+        v-for="(row, idx) in rows"
+        :key="rowKeyOf(row, idx)"
+        :class="[
+          'space-y-2.5 rounded-2xl border border-grey-5 bg-surface p-4',
+          clickable ? 'cursor-pointer active:bg-grey-3' : ''
+        ]"
+        @click="clickable && emit('row-click', row)"
+      >
+        <div v-for="col in columns" :key="col.key" class="flex items-start justify-between gap-3">
+          <span class="shrink-0 text-caption1 text-grey-7">{{ col.label }}</span>
+          <div class="min-w-0 text-right text-label1 text-grey-13">
             <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">
               {{ row[col.key] ?? '-' }}
             </slot>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
