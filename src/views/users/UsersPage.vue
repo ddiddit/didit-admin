@@ -8,6 +8,7 @@ import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
 import FilterChips from '@/components/common/FilterChips.vue'
+import SelectField from '@/components/common/SelectField.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Badge from '@/components/common/Badge.vue'
 import Pagination from '@/components/common/Pagination.vue'
@@ -52,6 +53,19 @@ const statusOptions = [
   { value: '' as const, label: '전체' },
   { value: 'active' as const, label: '활성' },
   { value: 'deleted' as const, label: '탈퇴' },
+]
+
+// 모바일 셀렉트용 옵션 (두 셀렉트를 구분하기 위해 '전체' 라벨에 항목명 부여)
+const jobSelectOptions = [
+  { value: '', label: '전체 직무' },
+  { value: 'PLANNER', label: '기획' },
+  { value: 'DEVELOPER', label: '개발' },
+  { value: 'DESIGNER', label: '디자인' },
+]
+const statusSelectOptions = [
+  { value: '', label: '전체 상태' },
+  { value: 'active', label: '활성' },
+  { value: 'deleted', label: '탈퇴' },
 ]
 
 const isDeletedParam = computed(() => {
@@ -149,17 +163,35 @@ onMounted(fetchUsers)
     <div class="space-y-5">
       <PageHeader title="유저 관리" :subtitle="page ? `총 ${page.totalElements}명` : undefined" />
 
-      <!-- 검색 + 필터 (모바일: 한 줄씩, sm 이상: 한 행) -->
-      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div class="w-full sm:min-w-[220px] sm:flex-1">
+      <!-- 검색 + 필터 -->
+      <div class="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
+        <div class="w-full md:min-w-[220px] md:flex-1">
           <SearchInput
             :model-value="keyword"
             placeholder="이메일 또는 닉네임 검색"
             @update:model-value="onKeywordInput"
           />
         </div>
-        <FilterChips :model-value="jobFilter" :options="jobOptions" @update:model-value="onJobChange" />
-        <FilterChips :model-value="statusFilter" :options="statusOptions" @update:model-value="onStatusChange" />
+
+        <!-- 모바일: 셀렉트 (감사 로그와 동일) -->
+        <div class="flex flex-col gap-2 md:hidden">
+          <SelectField
+            :model-value="jobFilter"
+            :options="jobSelectOptions"
+            @update:model-value="(v) => onJobChange(v as UserJob | '')"
+          />
+          <SelectField
+            :model-value="statusFilter"
+            :options="statusSelectOptions"
+            @update:model-value="(v) => onStatusChange(v as 'active' | 'deleted' | '')"
+          />
+        </div>
+
+        <!-- 데스크톱: 칩 -->
+        <div class="hidden md:flex md:flex-wrap md:items-center md:gap-3">
+          <FilterChips :model-value="jobFilter" :options="jobOptions" @update:model-value="onJobChange" />
+          <FilterChips :model-value="statusFilter" :options="statusOptions" @update:model-value="onStatusChange" />
+        </div>
       </div>
 
       <DataTable
