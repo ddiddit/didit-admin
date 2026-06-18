@@ -71,7 +71,7 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
     </Transition>
 
     <!-- 데스크탑 사이드바 -->
-    <aside v-if="isDesktop" class="w-64 flex-shrink-0 flex flex-col border-r border-grey-5 bg-surface">
+    <aside v-if="isDesktop" class="sticky top-0 h-screen w-64 flex-shrink-0 flex flex-col border-r border-grey-5 bg-surface">
       <div class="px-5 h-16 border-b border-grey-5 flex items-center">
         <img src="@/assets/logo.png" alt="didit" class="h-7" />
       </div>
