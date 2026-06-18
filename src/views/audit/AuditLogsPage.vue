@@ -109,7 +109,6 @@ onMounted(() => fetchLogs(0))
       >
         <template #cell-action="{ row }">
           <span class="font-medium">{{ actionLabel(row.action) }}</span>
-          <span class="ml-1.5 hidden text-caption2 text-grey-6 sm:inline">{{ row.action }}</span>
         </template>
         <template #cell-actorType="{ row }">
           <Badge :tone="actorTone(row.actorType)">{{ actorTypeLabel(row.actorType) }}</Badge>
