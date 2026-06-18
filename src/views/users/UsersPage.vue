@@ -174,7 +174,7 @@ onMounted(fetchUsers)
         @row-click="(row) => router.push(`/users/${row.id}`)"
       >
         <template #cell-email="{ row }">
-          <span class="block max-w-[180px] truncate">{{ row.email || '-' }}</span>
+          <span class="whitespace-nowrap">{{ row.email || '-' }}</span>
         </template>
         <template #cell-nickname="{ row }">
           <span class="text-grey-9">{{ row.nickname || '-' }}</span>
