@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
-import { UserPlus } from 'lucide-vue-next'
+import { UserPlus, Users } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
+import BaseSpinner from '@/components/common/BaseSpinner.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import Badge from '@/components/common/Badge.vue'
+import BaseButton from '@/components/common/BaseButton.vue'
 import { adminApi } from '@/api/admin.api'
 import type { Admin } from '@/types/admin'
-import type { ProblemDetail } from '@/types/api'
 import InviteModal from '@/components/managers/InviteModal.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import BaseSpinner from '@/components/common/BaseSpinner.vue'
+import { getErrorMessage } from '@/utils/error'
 
 const admins = ref<Admin[]>([])
 const isLoading = ref(false)
@@ -20,86 +24,51 @@ const showRejectDialog = ref(false)
 const showDeleteDialog = ref(false)
 const isActionLoading = ref(false)
 
+const columns = [
+  { key: 'email', label: '이메일', align: 'left' as const, width: '45%' },
+  { key: 'position', label: '직군', align: 'center' as const, width: '20%' },
+  { key: 'status', label: '상태', align: 'center' as const, width: '15%' },
+  { key: 'action', label: '액션', align: 'center' as const, width: '20%' },
+]
+
 const fetchAdmins = async () => {
   isLoading.value = true
   try {
     const response = await adminApi.list()
     admins.value = response.data.data.filter(admin => admin.role !== 'SUPER_ADMIN')
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '목록을 불러오지 못했습니다.')
+    toast.error(getErrorMessage(error, '목록을 불러오지 못했습니다.'))
   } finally {
     isLoading.value = false
   }
 }
 
-const handleApprove = async () => {
-  if (!selectedAdmin.value) return
+const runAction = async (fn: () => Promise<unknown>, successMsg: string, failMsg: string, close: () => void) => {
   isActionLoading.value = true
   try {
-    await adminApi.approve(selectedAdmin.value.id)
-    toast.success('승인되었습니다.')
-    showApproveDialog.value = false
+    await fn()
+    toast.success(successMsg)
+    close()
     await fetchAdmins()
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '승인에 실패했습니다.')
+    toast.error(getErrorMessage(error, failMsg))
   } finally {
     isActionLoading.value = false
   }
 }
 
-const handleReject = async () => {
-  if (!selectedAdmin.value) return
-  isActionLoading.value = true
-  try {
-    await adminApi.reject(selectedAdmin.value.id)
-    toast.success('거절되었습니다.')
-    showRejectDialog.value = false
-    await fetchAdmins()
-  } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '거절에 실패했습니다.')
-  } finally {
-    isActionLoading.value = false
-  }
-}
+const handleApprove = () =>
+  runAction(() => adminApi.approve(selectedAdmin.value!.id), '승인되었습니다.', '승인에 실패했습니다.', () => (showApproveDialog.value = false))
+const handleReject = () =>
+  runAction(() => adminApi.reject(selectedAdmin.value!.id), '거절되었습니다.', '거절에 실패했습니다.', () => (showRejectDialog.value = false))
+const handleDelete = () =>
+  runAction(() => adminApi.delete(selectedAdmin.value!.id), '삭제되었습니다.', '삭제에 실패했습니다.', () => (showDeleteDialog.value = false))
 
-const handleDelete = async () => {
-  if (!selectedAdmin.value) return
-  isActionLoading.value = true
-  try {
-    await adminApi.delete(selectedAdmin.value.id)
-    toast.success('삭제되었습니다.')
-    showDeleteDialog.value = false
-    await fetchAdmins()
-  } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '삭제에 실패했습니다.')
-  } finally {
-    isActionLoading.value = false
-  }
-}
-
-const statusLabel = (status: Admin['status']) => {
-  const map = { PENDING: '대기', ACTIVE: '활성', REJECTED: '거절' }
-  return map[status]
-}
-
-const statusClass = (status: Admin['status']) => {
-  const map = {
-    PENDING: 'badge-yellow',
-    ACTIVE: 'badge-green',
-    REJECTED: 'badge-red',
-  }
-  return map[status]
-}
-
-const positionLabel = (position?: Admin['position']) => {
-  if (!position) return '-'
-  const map = { PLANNER: '기획자', DESIGNER: '디자이너', DEVELOPER: '개발자' }
-  return map[position]
-}
+const statusLabel = (status: Admin['status']) => ({ PENDING: '대기', ACTIVE: '활성', REJECTED: '거절' }[status])
+const statusTone = (status: Admin['status']): 'yellow' | 'green' | 'red' =>
+  status === 'PENDING' ? 'yellow' : status === 'ACTIVE' ? 'green' : 'red'
+const positionLabel = (position?: Admin['position']) =>
+  position ? { PLANNER: '기획자', DESIGNER: '디자이너', DEVELOPER: '개발자' }[position] : '-'
 
 onMounted(fetchAdmins)
 </script>
@@ -109,142 +78,62 @@ onMounted(fetchAdmins)
     <BaseSpinner :show="isLoading || isActionLoading" />
 
     <div class="space-y-5">
+      <PageHeader title="관리자 관리" :subtitle="`총 ${admins.length}명`">
+        <template #actions>
+          <BaseButton variant="primary" @click="showInviteModal = true">
+            <UserPlus class="h-4 w-4" />
+            관리자 초대
+          </BaseButton>
+        </template>
+      </PageHeader>
 
-      <!-- 헤더 -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-heading2 font-semibold text-grey-13">관리자 목록</h2>
-          <p class="mt-0.5 text-label1 text-grey-7">총 {{ admins.length }}명</p>
-        </div>
-        <button
-          @click="showInviteModal = true"
-          class="flex items-center gap-2 rounded-xl bg-primary px-4 h-[44px] text-label1 font-semibold text-white hover:bg-green-hover transition cursor-pointer"
-        >
-          <UserPlus class="w-4 h-4" />
-          관리자 초대
-        </button>
-      </div>
-
-      <!-- 테이블 (sm 이상) -->
-      <div class="hidden sm:block overflow-hidden rounded-2xl bg-surface border border-grey-5">
-        <table class="w-full text-sm table-fixed">
-          <colgroup>
-            <col class="w-[40%]" />
-            <col class="w-[20%]" />
-            <col class="w-[15%]" />
-            <col class="w-[25%]" />
-          </colgroup>
-          <thead>
-            <tr class="border-b border-grey-5 bg-grey-3">
-              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">이메일</th>
-              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">직군</th>
-              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">상태</th>
-              <th class="px-5 py-3.5 text-center text-caption1 font-semibold text-grey-7">액션</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-grey-4">
-            <tr v-if="admins.length === 0">
-              <td colspan="4" class="py-16 text-center text-label1 text-grey-7">
-                등록된 관리자가 없습니다.
-              </td>
-            </tr>
-            <tr v-for="admin in admins" :key="admin.id" class="hover:bg-grey-3 transition">
-              <td class="px-5 py-4 text-center text-label1 text-grey-13">
-                <span class="block truncate">{{ admin.email }}</span>
-              </td>
-              <td class="px-5 py-4 text-center text-label1 text-grey-8">
-                {{ positionLabel(admin.position) }}
-              </td>
-              <td class="px-5 py-4 text-center">
-                <span :class="statusClass(admin.status)">
-                  {{ statusLabel(admin.status) }}
-                </span>
-              </td>
-              <td class="px-5 py-4">
-                <div class="flex items-center justify-center gap-2">
-                  <template v-if="admin.status === 'PENDING'">
-                    <button
-                      @click="selectedAdmin = admin; showApproveDialog = true"
-                      class="rounded-lg bg-green-light px-3 py-1.5 text-caption1 font-medium text-green-dark hover:bg-green-light-hover transition cursor-pointer"
-                    >
-                      승인
-                    </button>
-                    <button
-                      @click="selectedAdmin = admin; showRejectDialog = true"
-                      class="rounded-lg bg-danger/10 px-3 py-1.5 text-caption1 font-medium text-danger hover:bg-danger/20 transition cursor-pointer"
-                    >
-                      거절
-                    </button>
-                  </template>
-                  <button
-                    @click="selectedAdmin = admin; showDeleteDialog = true"
-                    class="rounded-lg bg-grey-4 px-3 py-1.5 text-caption1 font-medium text-grey-7 hover:bg-danger/10 hover:text-danger transition cursor-pointer"
-                  >
-                    삭제
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 카드 (sm 미만) -->
-      <div class="sm:hidden space-y-3">
-        <p v-if="admins.length === 0" class="py-16 text-center text-label1 text-grey-7">
-          등록된 관리자가 없습니다.
-        </p>
-        <div
-          v-for="admin in admins"
-          :key="admin.id"
-          class="bg-surface rounded-2xl border border-grey-5 px-4 py-4 space-y-3"
-        >
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-label1 font-medium text-grey-13 truncate">{{ admin.email }}</span>
-            <span :class="['flex-shrink-0', statusClass(admin.status)]">
-              {{ statusLabel(admin.status) }}
-            </span>
-          </div>
-
-          <div class="text-caption1 text-grey-7">
-            직군 <span class="text-grey-9 font-medium ml-1">{{ positionLabel(admin.position) }}</span>
-          </div>
-
-          <div class="flex items-center gap-2 pt-1 border-t border-grey-4">
-            <template v-if="admin.status === 'PENDING'">
+      <DataTable
+        :columns="columns"
+        :rows="admins"
+        row-key="id"
+        min-width="min-w-[560px]"
+        :loading="isLoading"
+        empty-message="등록된 관리자가 없습니다."
+        :empty-icon="Users"
+      >
+        <template #cell-email="{ row }">
+          <span class="block truncate">{{ row.email }}</span>
+        </template>
+        <template #cell-position="{ row }">
+          <span class="text-grey-8">{{ positionLabel(row.position) }}</span>
+        </template>
+        <template #cell-status="{ row }">
+          <Badge :tone="statusTone(row.status)">{{ statusLabel(row.status) }}</Badge>
+        </template>
+        <template #cell-action="{ row }">
+          <div class="flex items-center justify-center gap-1.5">
+            <template v-if="row.status === 'PENDING'">
               <button
-                @click="selectedAdmin = admin; showApproveDialog = true"
-                class="flex-1 rounded-lg bg-green-light py-1.5 text-caption1 font-medium text-green-dark hover:bg-green-light-hover transition cursor-pointer"
+                @click="selectedAdmin = row; showApproveDialog = true"
+                class="rounded-lg bg-green-light px-3 py-1.5 text-caption1 font-medium text-green-dark transition hover:bg-green-light-hover cursor-pointer"
               >
                 승인
               </button>
               <button
-                @click="selectedAdmin = admin; showRejectDialog = true"
-                class="flex-1 rounded-lg bg-danger/10 py-1.5 text-caption1 font-medium text-danger hover:bg-danger/20 transition cursor-pointer"
+                @click="selectedAdmin = row; showRejectDialog = true"
+                class="rounded-lg bg-danger/10 px-3 py-1.5 text-caption1 font-medium text-danger transition hover:bg-danger/20 cursor-pointer"
               >
                 거절
               </button>
             </template>
             <button
-              @click="selectedAdmin = admin; showDeleteDialog = true"
-              class="flex-1 rounded-lg bg-grey-4 py-1.5 text-caption1 font-medium text-grey-7 hover:bg-danger/10 hover:text-danger transition cursor-pointer"
+              @click="selectedAdmin = row; showDeleteDialog = true"
+              class="rounded-lg bg-grey-4 px-3 py-1.5 text-caption1 font-medium text-grey-7 transition hover:bg-danger/10 hover:text-danger cursor-pointer"
             >
               삭제
             </button>
           </div>
-        </div>
-      </div>
-
+        </template>
+      </DataTable>
     </div>
 
-    <!-- 초대 모달 -->
-    <InviteModal
-      v-if="showInviteModal"
-      @close="showInviteModal = false"
-      @invited="fetchAdmins"
-    />
+    <InviteModal v-if="showInviteModal" @close="showInviteModal = false" @invited="fetchAdmins" />
 
-    <!-- 승인 다이얼로그 -->
     <ConfirmDialog
       v-if="showApproveDialog"
       title="관리자 승인"
@@ -254,8 +143,6 @@ onMounted(fetchAdmins)
       @close="showApproveDialog = false"
       @confirm="handleApprove"
     />
-
-    <!-- 거절 다이얼로그 -->
     <ConfirmDialog
       v-if="showRejectDialog"
       title="관리자 거절"
@@ -266,8 +153,6 @@ onMounted(fetchAdmins)
       @close="showRejectDialog = false"
       @confirm="handleReject"
     />
-
-    <!-- 삭제 다이얼로그 -->
     <ConfirmDialog
       v-if="showDeleteDialog"
       title="관리자 삭제"
@@ -278,6 +163,5 @@ onMounted(fetchAdmins)
       @close="showDeleteDialog = false"
       @confirm="handleDelete"
     />
-
   </DashboardLayout>
 </template>

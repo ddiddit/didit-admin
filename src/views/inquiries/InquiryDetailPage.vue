@@ -2,14 +2,17 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { ChevronLeft } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
+import BackLink from '@/components/common/BackLink.vue'
+import Card from '@/components/common/Card.vue'
+import Badge from '@/components/common/Badge.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { inquiriesApi } from '@/api/inquiries.api'
 import type { InquiryDetail } from '@/types/inquiry'
-import type { ProblemDetail } from '@/types/api'
+import { formatDateTime } from '@/utils/format'
+import { getErrorMessage } from '@/utils/error'
 
 const route = useRoute()
 const router = useRouter()
@@ -35,8 +38,7 @@ const fetchInquiry = async () => {
     inquiry.value = response.data.data
     answerContent.value = inquiry.value.adminAnswer ?? ''
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '문의를 불러오지 못했습니다.')
+    toast.error(getErrorMessage(error, '문의를 불러오지 못했습니다.'))
     router.push('/inquiries')
   } finally {
     isLoading.value = false
@@ -52,7 +54,6 @@ const handleSubmitAnswer = async () => {
   try {
     const id = route.params.id as string
     const payload = { answer: answerContent.value }
-
     if (inquiry.value?.adminAnswer) {
       await inquiriesApi.updateAnswer(id, payload)
       toast.success('답변이 수정되었습니다.')
@@ -63,8 +64,7 @@ const handleSubmitAnswer = async () => {
     isEditing.value = false
     await fetchInquiry()
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '답변 등록에 실패했습니다.')
+    toast.error(getErrorMessage(error, '답변 등록에 실패했습니다.'))
   } finally {
     isSubmitting.value = false
   }
@@ -80,8 +80,7 @@ const handleDeleteAnswer = async () => {
     isEditing.value = false
     await fetchInquiry()
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '답변 삭제에 실패했습니다.')
+    toast.error(getErrorMessage(error, '답변 삭제에 실패했습니다.'))
   } finally {
     isDeletingAnswer.value = false
   }
@@ -92,13 +91,6 @@ const cancelEdit = () => {
   answerContent.value = inquiry.value?.adminAnswer ?? ''
 }
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('ko-KR', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
-
 onMounted(fetchInquiry)
 </script>
 
@@ -106,110 +98,84 @@ onMounted(fetchInquiry)
   <DashboardLayout>
     <BaseSpinner :show="isLoading || isSubmitting || isDeletingAnswer" />
 
-    <div class="flex min-h-full justify-center pt-10">
-      <div class="w-full max-w-2xl space-y-5">
+    <div class="mx-auto w-full max-w-2xl space-y-5 pt-2">
+      <BackLink @click="router.push('/inquiries')" />
 
-        <!-- 뒤로가기 -->
-        <button
-          @click="router.push('/inquiries')"
-          class="flex items-center gap-1 text-label1 text-grey-7 hover:text-grey-9 transition cursor-pointer"
+      <template v-if="inquiry">
+        <!-- 문의 내용 -->
+        <Card class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-caption1 font-semibold uppercase tracking-wide text-grey-7">
+              {{ typeLabel(inquiry.type) }}
+              <span v-if="inquiry.type === 'ETC' && inquiry.typeEtc" class="text-grey-8">· {{ inquiry.typeEtc }}</span>
+            </span>
+            <Badge :tone="inquiry.status === 'PENDING' ? 'yellow' : 'green'">
+              {{ inquiry.status === 'PENDING' ? '대기' : '답변완료' }}
+            </Badge>
+          </div>
+          <div class="flex flex-col gap-0.5 text-caption1 text-grey-7">
+            <span class="truncate">{{ inquiry.email }}</span>
+            <span>{{ formatDateTime(inquiry.createdAt) }}</span>
+          </div>
+          <p class="whitespace-pre-wrap text-label1 leading-relaxed text-grey-10">{{ inquiry.content }}</p>
+        </Card>
+
+        <!-- 기존 답변 -->
+        <div
+          v-if="inquiry.adminAnswer"
+          class="space-y-3 rounded-2xl border border-green-light-active bg-green-light px-6 py-5"
         >
-          <ChevronLeft class="w-4 h-4" />
-          <span>목록으로</span>
-        </button>
-
-        <template v-if="inquiry">
-
-          <!-- 문의 내용 -->
-          <div class="bg-surface rounded-2xl border border-grey-5 px-6 py-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-caption1 font-semibold text-grey-7 uppercase tracking-wide">
-                {{ typeLabel(inquiry.type) }}
-                <span v-if="inquiry.type === 'ETC' && inquiry.typeEtc" class="text-grey-8">
-                  · {{ inquiry.typeEtc }}
-                </span>
-              </span>
-              <span :class="inquiry.status === 'PENDING' ? 'badge-yellow' : 'badge-green'">
-                {{ inquiry.status === 'PENDING' ? '대기' : '답변완료' }}
-              </span>
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-0.5">
+              <h3 class="text-label1 font-semibold text-green-dark">답변</h3>
+              <span class="text-caption1 text-grey-7">{{ formatDateTime(inquiry.answeredAt) }}</span>
             </div>
-            <div class="flex flex-col gap-0.5 text-caption1 text-grey-7">
-              <span class="truncate">{{ inquiry.email }}</span>
-              <span>{{ formatDate(inquiry.createdAt) }}</span>
+            <div v-if="!isEditing" class="flex items-center gap-2">
+              <BaseButton variant="ghost" size="sm" @click="isEditing = true">수정</BaseButton>
+              <button
+                @click="showDeleteAnswerDialog = true"
+                class="rounded-lg border border-grey-5 bg-surface px-3 py-1.5 text-caption1 font-medium text-grey-8 transition hover:bg-danger/10 hover:text-danger cursor-pointer"
+              >
+                삭제
+              </button>
             </div>
-            <p class="text-label1 text-grey-10 whitespace-pre-wrap leading-relaxed">
-              {{ inquiry.content }}
-            </p>
           </div>
 
-          <!-- 기존 답변 -->
-          <div v-if="inquiry.adminAnswer" class="bg-green-light rounded-2xl border border-green-light-active px-6 py-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex flex-col gap-0.5">
-                <h3 class="text-label1 font-semibold text-green-dark">답변</h3>
-                <span class="text-caption1 text-grey-7">{{ formatDate(inquiry.answeredAt!) }}</span>
-              </div>
-              <div v-if="!isEditing" class="flex items-center gap-2">
-                <button
-                  @click="isEditing = true"
-                  class="rounded-lg bg-surface px-3 py-1.5 text-caption1 font-medium text-grey-8 hover:bg-grey-3 transition cursor-pointer border border-grey-5"
-                >
-                  수정
-                </button>
-                <button
-                  @click="showDeleteAnswerDialog = true"
-                  class="rounded-lg bg-surface px-3 py-1.5 text-caption1 font-medium text-grey-8 hover:bg-danger/10 hover:text-danger transition cursor-pointer border border-grey-5"
-                >
-                  삭제
-                </button>
-              </div>
-            </div>
+          <p v-if="!isEditing" class="whitespace-pre-wrap text-label1 leading-relaxed text-grey-10">
+            {{ inquiry.adminAnswer }}
+          </p>
 
-            <!-- 뷰 모드 -->
-            <p v-if="!isEditing" class="text-label1 text-grey-10 whitespace-pre-wrap leading-relaxed">
-              {{ inquiry.adminAnswer }}
-            </p>
-
-            <!-- 편집 모드 -->
-            <template v-else>
-              <textarea
-                v-model="answerContent"
-                rows="5"
-                class="w-full rounded-xl border border-grey-5 bg-surface px-4 py-3 text-label1 text-grey-13 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
-              />
-              <div class="flex gap-2">
-                <button
-                  @click="cancelEdit"
-                  class="flex-1 rounded-xl border border-grey-5 py-2.5 text-label1 font-medium text-grey-7 hover:bg-grey-3 transition cursor-pointer"
-                >
-                  취소
-                </button>
-                <BaseButton type="button" class="flex-1" :disabled="isSubmitting" @click="handleSubmitAnswer">
-                  수정 완료
-                </BaseButton>
-              </div>
-            </template>
-          </div>
-
-          <!-- 답변 작성 (답변 없을 때만) -->
-          <div v-if="!inquiry.adminAnswer" class="bg-surface rounded-2xl border border-grey-5 px-6 py-5 space-y-4">
-            <h3 class="text-label1 font-semibold text-grey-13">답변 작성</h3>
+          <template v-else>
             <textarea
               v-model="answerContent"
-              placeholder="답변을 입력해주세요"
               rows="5"
-              class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+              class="w-full resize-none rounded-xl border border-grey-5 bg-surface px-4 py-3 text-label1 text-grey-13 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
-            <BaseButton type="button" :disabled="isSubmitting" @click="handleSubmitAnswer">
-              답변 등록
-            </BaseButton>
-          </div>
+            <div class="flex gap-2">
+              <BaseButton variant="ghost" block @click="cancelEdit">취소</BaseButton>
+              <BaseButton variant="primary" block :loading="isSubmitting" @click="handleSubmitAnswer">
+                수정 완료
+              </BaseButton>
+            </div>
+          </template>
+        </div>
 
-        </template>
-      </div>
+        <!-- 답변 작성 (답변 없을 때만) -->
+        <Card v-if="!inquiry.adminAnswer" class="space-y-4">
+          <h3 class="text-label1 font-semibold text-grey-13">답변 작성</h3>
+          <textarea
+            v-model="answerContent"
+            placeholder="답변을 입력해주세요"
+            rows="5"
+            class="w-full resize-none rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+          <BaseButton variant="primary" block :loading="isSubmitting" @click="handleSubmitAnswer">
+            답변 등록
+          </BaseButton>
+        </Card>
+      </template>
     </div>
 
-    <!-- 답변 삭제 다이얼로그 -->
     <ConfirmDialog
       v-if="showDeleteAnswerDialog"
       title="답변 삭제"
@@ -220,6 +186,5 @@ onMounted(fetchInquiry)
       @close="showDeleteAnswerDialog = false"
       @confirm="handleDeleteAnswer"
     />
-
   </DashboardLayout>
 </template>

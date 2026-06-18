@@ -34,6 +34,18 @@
   --color-danger:    #F73838;
   --color-danger-50: #FF5C5C;
   --color-accent:    #FF6E58;
+  --color-info:       #5A8DEE;
+  --color-info-light: #E6EEFC;
+  --color-warning:       #B07D00;
+  --color-warning-light: #FFF9E6;
+
+  /* Chart 카테고리 팔레트 (앱 Tag 팔레트 기반, 막대/도넛 등 분류 색) */
+  --color-chart-1: #3DDB99;
+  --color-chart-2: #5A8DEE;
+  --color-chart-3: #DEAD3A;
+  --color-chart-4: #F08A5D;
+  --color-chart-5: #8C7CF0;
+  --color-chart-6: #C6C6C6;
 
   /* Semantic aliases */
   --color-surface:    #FFFFFF;
@@ -63,11 +75,12 @@
 }
 
 @layer components {
-  /* 배지 */
-  .badge-green  { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-green-light text-green-dark; }
-  .badge-grey   { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-grey-4 text-grey-8; }
-  .badge-yellow { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-[#FFF9E6] text-[#B07D00]; }
-  .badge-red    { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption1 font-medium bg-danger/10 text-danger; }
+  /* 배지 — pill 형태. 톤별 배경/글자색만 다름 */
+  .badge-green  { @apply inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-caption1 font-medium bg-green-light text-green-dark; }
+  .badge-grey   { @apply inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-caption1 font-medium bg-grey-4 text-grey-8; }
+  .badge-yellow { @apply inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-caption1 font-medium bg-warning-light text-warning; }
+  .badge-red    { @apply inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-caption1 font-medium bg-danger/10 text-danger; }
+  .badge-blue   { @apply inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-caption1 font-medium bg-info-light text-info; }
 }
 
 /* 타이포그래피 — @utility로 등록해야 @apply에서 참조 가능 (Tailwind v4) */

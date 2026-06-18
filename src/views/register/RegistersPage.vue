@@ -5,7 +5,7 @@ import { toast } from 'vue-sonner'
 import { adminApi } from '@/api/admin.api'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
-import type { ProblemDetail } from '@/types/api'
+import { getErrorMessage } from '@/utils/error'
 
 const router = useRouter()
 const route = useRoute()
@@ -38,8 +38,7 @@ const handleSubmit = async () => {
     await adminApi.register(token.value, { email: email.value.trim(), password: password.value })
     await router.push('/login')
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '계정 생성에 실패했습니다.')
+    toast.error(getErrorMessage(error, '계정 생성에 실패했습니다.'))
   } finally {
     isLoading.value = false
   }
@@ -106,7 +105,7 @@ const handleSubmit = async () => {
             </p>
           </div>
 
-          <BaseButton type="submit" :disabled="!isFormValid || isLoading">
+          <BaseButton type="submit" size="lg" block :disabled="!isFormValid" :loading="isLoading">
             계정 생성
           </BaseButton>
         </form>
