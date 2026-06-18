@@ -83,49 +83,53 @@ onMounted(fetchHistory)
   <DashboardLayout>
     <BaseSpinner :show="isSending" />
 
-    <div class="mx-auto w-full max-w-2xl space-y-6 pt-2">
+    <div class="mx-auto w-full max-w-6xl space-y-6 pt-2">
       <PageHeader title="알림 발송" subtitle="전체 사용자에게 이메일을 발송합니다." />
 
-      <!-- 내용 입력 -->
-      <Card class="space-y-4">
-        <h3 class="text-label1 font-semibold text-grey-13">내용</h3>
-        <div>
-          <label class="mb-1.5 block text-label1 font-medium text-grey-9">제목</label>
-          <input
-            v-model="title"
-            type="text"
-            placeholder="이메일 제목을 입력해주세요"
-            class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-        <div>
-          <label class="mb-1.5 block text-label1 font-medium text-grey-9">내용</label>
-          <textarea
-            v-model="body"
-            placeholder="이메일 내용을 입력해주세요"
-            rows="4"
-            class="w-full resize-none rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-      </Card>
+      <!-- PC: 좌(작성) / 우(발송 이력) 2단, 모바일: 세로 스택 -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        <!-- 왼쪽: 작성 -->
+        <div class="space-y-4">
+          <Card class="space-y-4">
+            <h3 class="text-label1 font-semibold text-grey-13">내용</h3>
+            <div>
+              <label class="mb-1.5 block text-label1 font-medium text-grey-9">제목</label>
+              <input
+                v-model="title"
+                type="text"
+                placeholder="이메일 제목을 입력해주세요"
+                class="w-full rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-label1 font-medium text-grey-9">내용</label>
+              <textarea
+                v-model="body"
+                placeholder="이메일 내용을 입력해주세요"
+                rows="6"
+                class="w-full resize-none rounded-xl border border-grey-5 bg-grey-3 px-4 py-3 text-label1 text-grey-13 placeholder:text-grey-7 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </Card>
 
-      <BaseButton variant="primary" size="lg" block :loading="isSending" @click="handleSend">
-        <Send v-if="!isSending" class="h-5 w-5" />
-        {{ isSending ? '발송 중...' : '발송하기' }}
-      </BaseButton>
+          <BaseButton variant="primary" size="lg" block :loading="isSending" @click="handleSend">
+            <Send v-if="!isSending" class="h-5 w-5" />
+            {{ isSending ? '발송 중...' : '발송하기' }}
+          </BaseButton>
+        </div>
 
-      <!-- 발송 이력 -->
-      <div class="space-y-3">
-        <h3 class="text-label1 font-semibold text-grey-13">발송 이력</h3>
-        <DataTable
-          :columns="columns"
-          :rows="history"
-          :row-key="(_, idx) => idx"
-          min-width="min-w-[560px]"
-          :loading="isLoadingHistory"
-          empty-message="발송 이력이 없습니다."
-          :empty-icon="Send"
-        >
+        <!-- 오른쪽: 발송 이력 -->
+        <div class="space-y-3">
+          <h3 class="text-label1 font-semibold text-grey-13">발송 이력</h3>
+          <DataTable
+            :columns="columns"
+            :rows="history"
+            :row-key="(_, idx) => idx"
+            min-width="min-w-[560px]"
+            :loading="isLoadingHistory"
+            empty-message="발송 이력이 없습니다."
+            :empty-icon="Send"
+          >
           <template #cell-createdAt="{ row }">
             <span class="whitespace-nowrap">{{ formatDateTime(row.createdAt) }}</span>
           </template>
@@ -146,7 +150,8 @@ onMounted(fetchHistory)
               {{ payloadNum(row.payload, 'failedCount') }}
             </span>
           </template>
-        </DataTable>
+          </DataTable>
+        </div>
       </div>
     </div>
   </DashboardLayout>

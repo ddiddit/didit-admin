@@ -149,9 +149,9 @@ onMounted(fetchUsers)
     <div class="space-y-5">
       <PageHeader title="유저 관리" :subtitle="page ? `총 ${page.totalElements}명` : undefined" />
 
-      <!-- 검색 + 필터 -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="min-w-[220px] flex-1">
+      <!-- 검색 + 필터 (모바일: 한 줄씩, sm 이상: 한 행) -->
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div class="w-full sm:min-w-[220px] sm:flex-1">
           <SearchInput
             :model-value="keyword"
             placeholder="이메일 또는 닉네임 검색"
