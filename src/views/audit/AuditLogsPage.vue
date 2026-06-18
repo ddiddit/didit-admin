@@ -7,7 +7,6 @@ import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Badge from '@/components/common/Badge.vue'
-import BaseButton from '@/components/common/BaseButton.vue'
 import SelectField from '@/components/common/SelectField.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { auditLogApi } from '@/api/auditLog.api'
@@ -85,11 +84,18 @@ onMounted(() => fetchLogs(0))
     <div class="space-y-5">
       <PageHeader title="감사 로그" subtitle="사용자 및 어드민의 주요 행동 기록을 조회합니다." />
 
-      <!-- 필터 -->
-      <div class="flex flex-wrap items-center gap-2">
-        <SelectField v-model="filterAction" :options="ACTION_OPTIONS" />
-        <SelectField v-model="filterActorType" :options="ACTOR_OPTIONS" />
-        <BaseButton variant="primary" @click="fetchLogs(0)">조회</BaseButton>
+      <!-- 필터 (선택 즉시 조회) -->
+      <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <SelectField
+          :model-value="filterAction"
+          :options="ACTION_OPTIONS"
+          @update:model-value="(v) => { filterAction = v; fetchLogs(0) }"
+        />
+        <SelectField
+          :model-value="filterActorType"
+          :options="ACTOR_OPTIONS"
+          @update:model-value="(v) => { filterActorType = v; fetchLogs(0) }"
+        />
       </div>
 
       <DataTable

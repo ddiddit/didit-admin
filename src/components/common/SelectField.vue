@@ -18,7 +18,7 @@
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="absolute left-0 top-full z-30 mt-1.5 max-h-72 min-w-full overflow-y-auto rounded-xl border border-grey-5 bg-surface py-1 shadow-card"
+        class="absolute left-0 top-full z-30 mt-1.5 max-h-[70vh] w-max min-w-[200px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-grey-5 bg-surface py-1 shadow-card"
       >
         <button
           v-for="opt in options"
