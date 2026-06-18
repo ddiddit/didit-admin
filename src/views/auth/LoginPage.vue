@@ -24,7 +24,7 @@ const submitLogin = async () => {
     const response = await authApi.login({ email: email.value.trim(), password: password.value })
     const { accessToken, refreshToken } = response.data.data
     tokenStorage.setTokens(accessToken, refreshToken)
-    await router.push('/notices')
+    await router.push('/dashboard')
   } catch (error: unknown) {
     const problem = (error as any)?.response?.data as ProblemDetail | undefined
     errorMessage.value = problem?.detail || '이메일과 비밀번호를 확인해주세요.'
