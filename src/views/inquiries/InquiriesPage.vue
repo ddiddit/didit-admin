@@ -18,10 +18,10 @@ const inquiries = ref<Inquiry[]>([])
 const isLoading = ref(false)
 
 const columns = [
-  { key: 'content', label: '내용', align: 'left' as const, width: '35%' },
-  { key: 'email', label: '작성자', align: 'center' as const, width: '22%' },
-  { key: 'type', label: '유형', align: 'center' as const, width: '13%' },
-  { key: 'status', label: '상태', align: 'center' as const, width: '15%' },
+  { key: 'content', label: '내용', align: 'left' as const, width: '28%' },
+  { key: 'email', label: '작성자', align: 'center' as const, width: '32%' },
+  { key: 'type', label: '유형', align: 'center' as const, width: '12%' },
+  { key: 'status', label: '상태', align: 'center' as const, width: '13%' },
   { key: 'createdAt', label: '등록일', align: 'center' as const, width: '15%' },
 ]
 
@@ -56,7 +56,7 @@ onMounted(fetchInquiries)
         :columns="columns"
         :rows="inquiries"
         row-key="id"
-        min-width="min-w-[700px]"
+        min-width="min-w-[860px]"
         clickable
         :loading="isLoading"
         empty-message="등록된 문의가 없습니다."

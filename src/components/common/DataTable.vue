@@ -26,7 +26,7 @@
               <th
                 v-for="col in columns"
                 :key="col.key"
-                :class="['px-4 py-3.5 text-caption1 font-semibold text-grey-7', alignClass(col.align), hideClass(col.hideBelow)]"
+                :class="['px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7', hideClass(col.hideBelow)]"
               >
                 {{ col.label }}
               </th>
@@ -42,7 +42,7 @@
               <td
                 v-for="col in columns"
                 :key="col.key"
-                :class="['px-4 py-4 text-label1 text-grey-13', alignClass(col.align), hideClass(col.hideBelow)]"
+                :class="['px-4 py-4 text-center text-label1 text-grey-13', hideClass(col.hideBelow)]"
               >
                 <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">
                   {{ row[col.key] ?? '-' }}
@@ -124,9 +124,6 @@ const rowKeyOf = (row: Row, index: number): string | number => {
   if (typeof props.rowKey === 'string') return row[props.rowKey] ?? index
   return index
 }
-
-const alignClass = (align?: string) =>
-  align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
 
 const hideClass = (hideBelow?: string) =>
   hideBelow === 'sm' ? 'hidden sm:table-cell'
