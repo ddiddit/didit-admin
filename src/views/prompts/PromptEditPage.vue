@@ -9,7 +9,6 @@ import Badge from '@/components/common/Badge.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { promptsApi } from '@/api/prompts.api'
-import { tokenStorage } from '@/utils/token'
 import type { Prompt } from '@/types/prompt'
 import { formatDateTime } from '@/utils/format'
 import { getErrorMessage } from '@/utils/error'
@@ -23,7 +22,6 @@ const isLoading = ref(false)
 const isSaving = ref(false)
 const showSaveDialog = ref(false)
 
-const isSuperAdmin = computed(() => tokenStorage.isSuperAdmin())
 const isDirty = computed(() => prompt.value !== null && editContent.value !== prompt.value.content)
 
 const jobLabel = (jobType: string) => {
@@ -89,16 +87,13 @@ onMounted(fetchPrompt)
           </div>
           <textarea
             v-model="editContent"
-            :readonly="!isSuperAdmin"
             class="h-[60vh] w-full resize-none bg-surface p-4 font-mono text-caption1 leading-relaxed text-grey-13 outline-none"
-            :class="!isSuperAdmin ? 'cursor-default opacity-80' : ''"
             spellcheck="false"
           />
         </div>
 
         <!-- 저장 버튼 (에디터 하단) -->
         <BaseButton
-          v-if="isSuperAdmin"
           variant="primary"
           size="lg"
           block
@@ -108,10 +103,6 @@ onMounted(fetchPrompt)
         >
           저장
         </BaseButton>
-
-        <p v-else class="text-center text-caption1 text-grey-7">
-          프롬프트 수정은 슈퍼어드민만 가능합니다.
-        </p>
       </template>
     </div>
 
