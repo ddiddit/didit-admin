@@ -1,11 +1,11 @@
 <template>
-  <div ref="root" class="relative inline-block">
+  <div ref="root" class="relative block w-full sm:inline-block sm:w-auto">
     <!-- 트리거 -->
     <button
       type="button"
       @click="open = !open"
       :class="[
-        'flex h-11 items-center justify-between gap-2 rounded-xl border bg-surface pl-3.5 pr-3 text-label1 text-grey-13 outline-none transition cursor-pointer',
+        'flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-surface pl-3.5 pr-3 text-label1 text-grey-13 outline-none transition cursor-pointer sm:w-auto',
         open ? 'border-primary ring-2 ring-primary/20' : 'border-grey-5 hover:border-grey-6'
       ]"
       :style="minWidth ? `min-width:${minWidth}` : ''"
@@ -18,7 +18,7 @@
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="absolute left-0 top-full z-30 mt-1.5 max-h-[70vh] w-max min-w-[200px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-grey-5 bg-surface py-1 shadow-card"
+        class="absolute left-0 top-full z-30 mt-1.5 max-h-[70vh] w-max min-w-full max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-grey-5 bg-surface py-1 shadow-card sm:min-w-[200px]"
       >
         <button
           v-for="opt in options"
