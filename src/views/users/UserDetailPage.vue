@@ -105,71 +105,77 @@ onMounted(fetchUser)
   <DashboardLayout>
     <BaseSpinner :show="isLoading || isWithdrawing" />
 
-    <div class="mx-auto w-full max-w-2xl space-y-5 pt-2">
+    <div class="mx-auto w-full max-w-6xl space-y-5 pt-2">
       <BackLink @click="router.push('/users')" />
 
       <template v-if="userDetail">
-        <!-- 프로필 카드 -->
-        <Card class="space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-body3 font-semibold text-grey-13">유저 정보</h2>
-            <Badge :tone="userDetail.profile.deleted ? 'red' : 'green'">
-              {{ userDetail.profile.deleted ? '탈퇴' : '활성' }}
-            </Badge>
-          </div>
-          <div class="grid grid-cols-2 gap-x-8 gap-y-3">
-            <div v-for="field in profileFields" :key="field.label">
-              <p class="text-caption1 text-grey-7">{{ field.label }}</p>
-              <p class="mt-0.5 text-label1 text-grey-13">{{ field.value }}</p>
-            </div>
-          </div>
-        </Card>
-
-        <!-- 강제 탈퇴 (SUPER_ADMIN만) -->
-        <Card v-if="isSuperAdmin">
-          <div class="flex items-center justify-between gap-4">
-            <div>
-              <h3 class="text-label1 font-semibold text-grey-13">강제 탈퇴</h3>
-              <p class="mt-0.5 text-caption1 text-grey-7">탈퇴 처리 후 되돌릴 수 없습니다.</p>
-            </div>
-            <BaseButton
-              variant="danger"
-              :disabled="userDetail.profile.deleted"
-              @click="showWithdrawDialog = true"
-            >
-              강제 탈퇴
-            </BaseButton>
-          </div>
-        </Card>
-
-        <!-- 활동 타임라인 -->
-        <Card class="space-y-4">
-          <h3 class="text-label1 font-semibold text-grey-13">최근 활동 (최대 20건)</h3>
-          <EmptyState v-if="userDetail.timeline.length === 0" message="활동 내역이 없습니다." />
-          <ol v-else class="relative ml-3 space-y-6 border-l border-grey-5">
-            <li v-for="log in userDetail.timeline" :key="log.createdAt" class="ml-5">
-              <div class="absolute -left-1.5 mt-1 h-3 w-3 rounded-full border border-surface bg-grey-5" />
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p class="text-label1 font-medium text-grey-13">{{ actionLabel(log.action) }}</p>
-                  <p
-                    v-if="log.action === 'RETROSPECTIVE_SAVED' && log.payload?.title"
-                    class="mt-0.5 text-caption1 text-grey-7"
-                  >
-                    {{ log.payload.title }}
-                  </p>
-                  <p
-                    v-else-if="log.action === 'BADGE_ACQUIRED' && log.payload?.badgeType"
-                    class="mt-0.5 text-caption1 text-grey-7"
-                  >
-                    {{ log.payload.badgeType }}
-                  </p>
-                </div>
-                <p class="shrink-0 text-caption1 text-grey-7">{{ formatDateTime(log.createdAt) }}</p>
+        <!-- PC: 좌(정보·강제탈퇴) / 우(활동) 2단, 모바일: 세로 스택 -->
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
+          <!-- 왼쪽 -->
+          <div class="space-y-5">
+            <!-- 프로필 카드 -->
+            <Card class="space-y-4">
+              <div class="flex items-center justify-between">
+                <h2 class="text-body3 font-semibold text-grey-13">유저 정보</h2>
+                <Badge :tone="userDetail.profile.deleted ? 'red' : 'green'">
+                  {{ userDetail.profile.deleted ? '탈퇴' : '활성' }}
+                </Badge>
               </div>
-            </li>
-          </ol>
-        </Card>
+              <div class="grid grid-cols-2 gap-x-8 gap-y-3">
+                <div v-for="field in profileFields" :key="field.label">
+                  <p class="text-caption1 text-grey-7">{{ field.label }}</p>
+                  <p class="mt-0.5 break-all text-label1 text-grey-13">{{ field.value }}</p>
+                </div>
+              </div>
+            </Card>
+
+            <!-- 강제 탈퇴 (SUPER_ADMIN만) -->
+            <Card v-if="isSuperAdmin">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <h3 class="text-label1 font-semibold text-grey-13">강제 탈퇴</h3>
+                  <p class="mt-0.5 text-caption1 text-grey-7">탈퇴 처리 후 되돌릴 수 없습니다.</p>
+                </div>
+                <BaseButton
+                  variant="danger"
+                  :disabled="userDetail.profile.deleted"
+                  @click="showWithdrawDialog = true"
+                >
+                  강제 탈퇴
+                </BaseButton>
+              </div>
+            </Card>
+          </div>
+
+          <!-- 오른쪽: 활동 타임라인 -->
+          <Card class="space-y-4">
+            <h3 class="text-label1 font-semibold text-grey-13">최근 활동 (최대 20건)</h3>
+            <EmptyState v-if="userDetail.timeline.length === 0" message="활동 내역이 없습니다." />
+            <ol v-else class="relative ml-3 space-y-6 border-l border-grey-5">
+              <li v-for="log in userDetail.timeline" :key="log.createdAt" class="ml-5">
+                <div class="absolute -left-1.5 mt-1 h-3 w-3 rounded-full border border-surface bg-grey-5" />
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-label1 font-medium text-grey-13">{{ actionLabel(log.action) }}</p>
+                    <p
+                      v-if="log.action === 'RETROSPECTIVE_SAVED' && log.payload?.title"
+                      class="mt-0.5 text-caption1 text-grey-7"
+                    >
+                      {{ log.payload.title }}
+                    </p>
+                    <p
+                      v-else-if="log.action === 'BADGE_ACQUIRED' && log.payload?.badgeType"
+                      class="mt-0.5 text-caption1 text-grey-7"
+                    >
+                      {{ log.payload.badgeType }}
+                    </p>
+                  </div>
+                  <p class="shrink-0 text-caption1 text-grey-7">{{ formatDateTime(log.createdAt) }}</p>
+                </div>
+              </li>
+            </ol>
+          </Card>
+        </div>
       </template>
     </div>
 
