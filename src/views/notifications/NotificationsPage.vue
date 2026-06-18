@@ -117,20 +117,17 @@ onMounted(fetchHistory)
           </BaseButton>
         </div>
 
-        <!-- 오른쪽: 발송 이력 (카드 안에 제목 + 표) -->
-        <Card class="space-y-4">
-          <h3 class="text-label1 font-semibold text-grey-13">발송 이력</h3>
-          <DataTable
-            :columns="columns"
-            :rows="history"
-            :row-key="(_, idx) => idx"
-            min-width="min-w-[560px]"
-            min-height="lg:min-h-[320px]"
-            :bordered="false"
-            :loading="isLoadingHistory"
-            empty-message="발송 이력이 없습니다."
-            :empty-icon="Send"
-          >
+        <!-- 오른쪽: 발송 이력 -->
+        <DataTable
+          :columns="columns"
+          :rows="history"
+          :row-key="(_, idx) => idx"
+          min-width="min-w-[560px]"
+          min-height="lg:min-h-[420px]"
+          :loading="isLoadingHistory"
+          empty-message="발송 이력이 없습니다."
+          :empty-icon="Send"
+        >
           <template #cell-createdAt="{ row }">
             <span class="whitespace-nowrap">{{ formatDateTime(row.createdAt) }}</span>
           </template>
@@ -151,8 +148,7 @@ onMounted(fetchHistory)
               {{ payloadNum(row.payload, 'failedCount') }}
             </span>
           </template>
-          </DataTable>
-        </Card>
+        </DataTable>
       </div>
     </div>
   </DashboardLayout>
