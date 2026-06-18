@@ -72,7 +72,7 @@ const router = createRouter({
             path: '/settings',
             name: 'settings',
             component: SettingsPage,
-            meta: { requiresAuth: true, requiresSuperAdmin: true },
+            meta: { requiresAuth: true },
         },
         {
             path: '/notifications',
@@ -102,13 +102,13 @@ const router = createRouter({
             path: '/prompts',
             name: 'prompts',
             component: PromptsPage,
-            meta: { requiresAuth: true, requiresSuperAdmin: true },
+            meta: { requiresAuth: true },
         },
         {
             path: '/prompts/:id',
             name: 'prompt-edit',
             component: PromptEditPage,
-            meta: { requiresAuth: true, requiresSuperAdmin: true },
+            meta: { requiresAuth: true },
         },
         {
             path: '/withdrawal-stats',
