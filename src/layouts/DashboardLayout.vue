@@ -129,14 +129,14 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
           </div>
         </div>
 
-        <!-- 관리 (SUPER_ADMIN 전용) -->
-        <div v-if="isSuperAdmin">
+        <!-- 관리 (관리자 관리는 SUPER_ADMIN 전용) -->
+        <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
           <div class="space-y-0.5">
             <RouterLink to="/prompts" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />프롬프트 관리
             </RouterLink>
-            <RouterLink to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+            <RouterLink v-if="isSuperAdmin" to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <User class="w-4 h-4 flex-shrink-0" />관리자 관리
             </RouterLink>
             <RouterLink to="/settings" :class="NAV_LINK" :active-class="NAV_ACTIVE">
@@ -241,13 +241,13 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
             </RouterLink>
           </div>
         </div>
-        <div v-if="isSuperAdmin">
+        <div>
           <p class="mb-1.5 px-3 text-caption1 font-semibold text-grey-7 uppercase tracking-wider">관리</p>
           <div class="space-y-0.5">
             <RouterLink to="/prompts" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />프롬프트 관리
             </RouterLink>
-            <RouterLink to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+            <RouterLink v-if="isSuperAdmin" to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <User class="w-4 h-4 flex-shrink-0" />관리자 관리
             </RouterLink>
             <RouterLink to="/settings" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
