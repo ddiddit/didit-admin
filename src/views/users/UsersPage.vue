@@ -2,12 +2,19 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Search } from 'lucide-vue-next'
+import { Users } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import SearchInput from '@/components/common/SearchInput.vue'
+import FilterChips from '@/components/common/FilterChips.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import Badge from '@/components/common/Badge.vue'
+import Pagination from '@/components/common/Pagination.vue'
 import { usersApi } from '@/api/users.api'
 import type { UserJob, UserPage } from '@/types/user'
-import type { ProblemDetail } from '@/types/api'
+import { formatDate } from '@/utils/format'
+import { getErrorMessage } from '@/utils/error'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,6 +28,18 @@ const statusFilter = ref<'active' | 'deleted' | ''>((route.query.status as 'acti
 const currentPage = ref(Number(route.query.page) || 0)
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+const columns = [
+  { key: 'email', label: '이메일', align: 'left' as const },
+  { key: 'nickname', label: '닉네임', align: 'center' as const },
+  { key: 'job', label: '직무', align: 'center' as const },
+  { key: 'age', label: '나이', align: 'center' as const },
+  { key: 'experience', label: '연차', align: 'center' as const },
+  { key: 'createdAt', label: '가입일', align: 'center' as const },
+  { key: 'lastLoginAt', label: '마지막 로그인', align: 'center' as const },
+  { key: 'onboardingCompleted', label: '온보딩', align: 'center' as const },
+  { key: 'deleted', label: '상태', align: 'center' as const },
+]
 
 const jobOptions: { value: UserJob | ''; label: string }[] = [
   { value: '', label: '전체' },
@@ -52,8 +71,7 @@ const fetchUsers = async () => {
     const response = await usersApi.list(params)
     page.value = response.data.data
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    toast.error(problem?.detail || '유저 목록을 불러오지 못했습니다.')
+    toast.error(getErrorMessage(error, '유저 목록을 불러오지 못했습니다.'))
   } finally {
     isLoading.value = false
   }
@@ -68,13 +86,24 @@ const syncQuery = () => {
   router.replace({ query: q })
 }
 
-const onKeywordInput = () => {
+const onKeywordInput = (value: string) => {
+  keyword.value = value
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
     currentPage.value = 0
     syncQuery()
     fetchUsers()
   }, 300)
+}
+
+const onJobChange = (value: UserJob | '') => {
+  jobFilter.value = value
+  onFilterChange()
+}
+
+const onStatusChange = (value: 'active' | 'deleted' | '') => {
+  statusFilter.value = value
+  onFilterChange()
 }
 
 const onFilterChange = () => {
@@ -110,13 +139,6 @@ const expLabel = (exp: string | null) => {
   return exp ? map[exp] ?? exp : '-'
 }
 
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('ko-KR', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-  })
-}
-
 onMounted(fetchUsers)
 </script>
 
@@ -125,157 +147,69 @@ onMounted(fetchUsers)
     <BaseSpinner :show="isLoading" />
 
     <div class="space-y-5">
-
-      <!-- 헤더 -->
-      <div>
-        <h2 class="text-heading2 font-semibold text-grey-13">유저 관리</h2>
-        <p v-if="page" class="mt-0.5 text-label1 text-grey-7">총 {{ page.totalElements }}명</p>
-      </div>
+      <PageHeader title="유저 관리" :subtitle="page ? `총 ${page.totalElements}명` : undefined" />
 
       <!-- 검색 + 필터 -->
       <div class="flex flex-wrap items-center gap-3">
-        <!-- 검색 인풋 -->
-        <div class="relative flex-1 min-w-[220px]">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-grey-7" />
-          <input
-            v-model="keyword"
-            @input="onKeywordInput"
-            type="text"
+        <div class="min-w-[220px] flex-1">
+          <SearchInput
+            :model-value="keyword"
             placeholder="이메일 또는 닉네임 검색"
-            class="w-full rounded-xl border border-grey-5 bg-grey-3 pl-9 pr-4 py-2.5 text-label1 text-grey-13 placeholder:text-grey-7 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+            @update:model-value="onKeywordInput"
           />
         </div>
-
-        <!-- 직무 필터 -->
-        <div class="flex items-center gap-1">
-          <button
-            v-for="opt in jobOptions"
-            :key="opt.value"
-            @click="jobFilter = opt.value; onFilterChange()"
-            :class="[
-              'rounded-xl px-3 py-2 text-label1 font-medium border transition cursor-pointer',
-              jobFilter === opt.value
-                ? 'bg-green-light border-primary text-green-dark'
-                : 'bg-grey-3 border-grey-5 text-grey-8 hover:border-primary/50'
-            ]"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
-
-        <!-- 상태 필터 -->
-        <div class="flex items-center gap-1">
-          <button
-            v-for="opt in statusOptions"
-            :key="opt.value"
-            @click="statusFilter = opt.value; onFilterChange()"
-            :class="[
-              'rounded-xl px-3 py-2 text-label1 font-medium border transition cursor-pointer',
-              statusFilter === opt.value
-                ? 'bg-green-light border-primary text-green-dark'
-                : 'bg-grey-3 border-grey-5 text-grey-8 hover:border-primary/50'
-            ]"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
+        <FilterChips :model-value="jobFilter" :options="jobOptions" @update:model-value="onJobChange" />
+        <FilterChips :model-value="statusFilter" :options="statusOptions" @update:model-value="onStatusChange" />
       </div>
 
-      <!-- 테이블 -->
-      <div class="overflow-x-auto rounded-2xl bg-surface border border-grey-5">
-        <table class="w-full text-sm min-w-[900px]">
-          <thead>
-            <tr class="border-b border-grey-5 bg-grey-3">
-              <th class="px-4 py-3.5 text-left text-caption1 font-semibold text-grey-7">이메일</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">닉네임</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">직무</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">나이</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">연차</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">가입일</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">마지막 로그인</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">온보딩</th>
-              <th class="px-4 py-3.5 text-center text-caption1 font-semibold text-grey-7">상태</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-grey-4">
-            <tr v-if="!page || page.content.length === 0">
-              <td colspan="9" class="py-16 text-center text-label1 text-grey-7">
-                {{ isLoading ? '' : '유저가 없습니다.' }}
-              </td>
-            </tr>
-            <tr
-              v-for="user in page?.content"
-              :key="user.id"
-              class="hover:bg-grey-3 transition cursor-pointer"
-              @click="router.push(`/users/${user.id}`)"
-            >
-              <td class="px-4 py-4 text-label1 text-grey-13">
-                <span class="block max-w-[180px] truncate">{{ user.email || '-' }}</span>
-              </td>
-              <td class="px-4 py-4 text-center text-label1 text-grey-9">
-                {{ user.nickname || '-' }}
-              </td>
-              <td class="px-4 py-4 text-center text-label1 text-grey-9">
-                {{ jobLabel(user.job) }}
-              </td>
-              <td class="px-4 py-4 text-center text-caption1 text-grey-7 whitespace-nowrap">
-                {{ ageLabel(user.age) }}
-              </td>
-              <td class="px-4 py-4 text-center text-caption1 text-grey-7 whitespace-nowrap">
-                {{ expLabel(user.experience) }}
-              </td>
-              <td class="px-4 py-4 text-center text-caption1 text-grey-7 whitespace-nowrap">
-                {{ formatDate(user.createdAt) }}
-              </td>
-              <td class="px-4 py-4 text-center text-caption1 text-grey-7 whitespace-nowrap">
-                {{ formatDate(user.lastLoginAt) }}
-              </td>
-              <td class="px-4 py-4 text-center">
-                <span :class="user.onboardingCompleted ? 'badge-green' : 'badge-grey'">
-                  {{ user.onboardingCompleted ? '완료' : '미완료' }}
-                </span>
-              </td>
-              <td class="px-4 py-4 text-center">
-                <span :class="user.deleted ? 'badge-red' : 'badge-green'">
-                  {{ user.deleted ? '탈퇴' : '활성' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :columns="columns"
+        :rows="page?.content ?? []"
+        row-key="id"
+        min-width="min-w-[900px]"
+        clickable
+        :loading="isLoading"
+        empty-message="유저가 없습니다."
+        :empty-icon="Users"
+        @row-click="(row) => router.push(`/users/${row.id}`)"
+      >
+        <template #cell-email="{ row }">
+          <span class="block max-w-[180px] truncate">{{ row.email || '-' }}</span>
+        </template>
+        <template #cell-nickname="{ row }">
+          <span class="text-grey-9">{{ row.nickname || '-' }}</span>
+        </template>
+        <template #cell-job="{ row }">
+          <span class="text-grey-9">{{ jobLabel(row.job) }}</span>
+        </template>
+        <template #cell-age="{ row }">
+          <span class="whitespace-nowrap text-caption1 text-grey-7">{{ ageLabel(row.age) }}</span>
+        </template>
+        <template #cell-experience="{ row }">
+          <span class="whitespace-nowrap text-caption1 text-grey-7">{{ expLabel(row.experience) }}</span>
+        </template>
+        <template #cell-createdAt="{ row }">
+          <span class="whitespace-nowrap text-caption1 text-grey-7">{{ formatDate(row.createdAt) }}</span>
+        </template>
+        <template #cell-lastLoginAt="{ row }">
+          <span class="whitespace-nowrap text-caption1 text-grey-7">{{ formatDate(row.lastLoginAt) }}</span>
+        </template>
+        <template #cell-onboardingCompleted="{ row }">
+          <Badge :tone="row.onboardingCompleted ? 'green' : 'grey'">
+            {{ row.onboardingCompleted ? '완료' : '미완료' }}
+          </Badge>
+        </template>
+        <template #cell-deleted="{ row }">
+          <Badge :tone="row.deleted ? 'red' : 'green'">{{ row.deleted ? '탈퇴' : '활성' }}</Badge>
+        </template>
+      </DataTable>
 
-      <!-- 페이지네이션 -->
-      <div v-if="page && page.totalPages > 1" class="flex items-center justify-center gap-1">
-        <button
-          :disabled="currentPage === 0"
-          @click="goToPage(currentPage - 1)"
-          class="rounded-xl border border-grey-5 px-3 py-2 text-caption1 font-medium text-grey-7 hover:bg-grey-3 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-        >
-          이전
-        </button>
-        <button
-          v-for="p in page.totalPages"
-          :key="p"
-          @click="goToPage(p - 1)"
-          :class="[
-            'rounded-xl border px-3 py-2 text-caption1 font-medium transition cursor-pointer',
-            currentPage === p - 1
-              ? 'bg-primary border-primary text-white'
-              : 'border-grey-5 text-grey-8 hover:bg-grey-3'
-          ]"
-        >
-          {{ p }}
-        </button>
-        <button
-          :disabled="currentPage >= page.totalPages - 1"
-          @click="goToPage(currentPage + 1)"
-          class="rounded-xl border border-grey-5 px-3 py-2 text-caption1 font-medium text-grey-7 hover:bg-grey-3 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-        >
-          다음
-        </button>
-      </div>
-
+      <Pagination
+        v-if="page"
+        :page="currentPage"
+        :total-pages="page.totalPages"
+        @change="goToPage"
+      />
     </div>
   </DashboardLayout>
 </template>
