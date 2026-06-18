@@ -44,11 +44,11 @@
       </table>
     </div>
 
-    <!-- 모바일: 카드 (md 미만) -->
-    <div class="space-y-3 md:hidden">
+    <!-- 모바일: 카드 (md 미만). 폭에 맞춰 1~2열 그리드 -->
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
       <template v-if="rows.length === 0">
-        <div v-if="loading" class="py-16" />
-        <div v-else class="rounded-2xl border border-grey-5 bg-surface">
+        <div v-if="loading" class="py-16 sm:col-span-2" />
+        <div v-else class="rounded-2xl border border-grey-5 bg-surface sm:col-span-2">
           <EmptyState :message="emptyMessage" :icon="emptyIcon" />
         </div>
       </template>
