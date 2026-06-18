@@ -91,7 +91,6 @@ onMounted(fetchHistory)
         <!-- 왼쪽: 작성 -->
         <div class="space-y-4">
           <Card class="space-y-4">
-            <h3 class="text-label1 font-semibold text-grey-13">내용</h3>
             <div>
               <label class="mb-1.5 block text-label1 font-medium text-grey-9">제목</label>
               <input
@@ -118,14 +117,16 @@ onMounted(fetchHistory)
           </BaseButton>
         </div>
 
-        <!-- 오른쪽: 발송 이력 -->
-        <div class="space-y-3">
+        <!-- 오른쪽: 발송 이력 (카드 안에 제목 + 표) -->
+        <Card class="space-y-4">
           <h3 class="text-label1 font-semibold text-grey-13">발송 이력</h3>
           <DataTable
             :columns="columns"
             :rows="history"
             :row-key="(_, idx) => idx"
             min-width="min-w-[560px]"
+            min-height="lg:min-h-[320px]"
+            :bordered="false"
             :loading="isLoadingHistory"
             empty-message="발송 이력이 없습니다."
             :empty-icon="Send"
@@ -151,7 +152,7 @@ onMounted(fetchHistory)
             </span>
           </template>
           </DataTable>
-        </div>
+        </Card>
       </div>
     </div>
   </DashboardLayout>
