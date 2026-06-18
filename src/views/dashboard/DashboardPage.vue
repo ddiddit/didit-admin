@@ -73,11 +73,35 @@ const chartDays = computed<DailyRetroCount[]>(() => {
   return days
 })
 
-const barHeight = (count: number) => `${Math.round((count / chartMax.value) * 100)}%`
 const dayLabel = (dateStr: string) => {
   const d = new Date(dateStr)
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
+
+// SVG 라인/영역 차트용 좌표 (x·y 모두 0~100 비율 공간)
+interface ChartPoint { x: number; y: number; count: number; label: string }
+const chartPoints = computed<ChartPoint[]>(() => {
+  const days = chartDays.value
+  const max = chartMax.value
+  const n = days.length
+  return days.map((d, i) => ({
+    x: n <= 1 ? 50 : (i / (n - 1)) * 100,
+    y: 100 - (d.count / max) * 100,
+    count: d.count,
+    label: dayLabel(d.date),
+  }))
+})
+
+const linePoints = computed(() => chartPoints.value.map(p => `${p.x},${p.y}`).join(' '))
+
+const areaPath = computed(() => {
+  const pts = chartPoints.value
+  if (pts.length === 0) return ''
+  let d = `M ${pts[0].x},100`
+  pts.forEach(p => { d += ` L ${p.x},${p.y}` })
+  d += ` L ${pts[pts.length - 1].x},100 Z`
+  return d
+})
 
 onMounted(fetchStats)
 </script>
@@ -105,19 +129,52 @@ onMounted(fetchStats)
         </Card>
       </div>
 
-      <!-- 주간 회고 추이 -->
+      <!-- 주간 회고 추이 (꺾은선+영역 차트) -->
       <Card>
-        <h3 class="mb-4 text-label1 font-semibold text-grey-13">주간 회고 추이 (최근 7일)</h3>
-        <div class="flex h-28 items-end gap-2">
-          <div v-for="day in chartDays" :key="day.date" class="flex flex-1 flex-col items-center gap-1">
-            <span class="text-caption2 text-grey-7">{{ day.count }}</span>
-            <div class="flex w-full items-end" style="height: 72px;">
-              <div
-                class="min-h-[2px] w-full rounded-t-lg bg-primary/70 transition-all duration-500"
-                :style="{ height: barHeight(day.count) }"
+        <h3 class="mb-6 text-label1 font-semibold text-grey-13">주간 회고 추이 (최근 7일)</h3>
+        <div class="relative w-full" style="height: 200px">
+          <!-- 플롯 영역: 값 라벨(위)·날짜 라벨(아래) 공간 확보 -->
+          <div class="absolute inset-x-1 bottom-7 top-7">
+            <svg class="h-full w-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path :d="areaPath" class="fill-primary/10" />
+              <polyline
+                :points="linePoints"
+                fill="none"
+                class="stroke-primary"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                vector-effect="non-scaling-stroke"
               />
+            </svg>
+
+            <!-- 데이터 점 -->
+            <div
+              v-for="(p, i) in chartPoints"
+              :key="`dot-${i}`"
+              class="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-2 ring-surface"
+              :style="{ left: `${p.x}%`, top: `${p.y}%` }"
+            />
+
+            <!-- 값 라벨 -->
+            <div
+              v-for="(p, i) in chartPoints"
+              :key="`val-${i}`"
+              class="absolute -mt-2.5 -translate-x-1/2 -translate-y-full text-caption2 font-medium text-grey-8"
+              :style="{ left: `${p.x}%`, top: `${p.y}%` }"
+            >
+              {{ p.count }}
             </div>
-            <span class="text-caption2 text-grey-6">{{ dayLabel(day.date) }}</span>
+
+            <!-- 날짜 라벨 -->
+            <div
+              v-for="(p, i) in chartPoints"
+              :key="`label-${i}`"
+              class="absolute top-full mt-2 -translate-x-1/2 whitespace-nowrap text-caption2 text-grey-6"
+              :style="{ left: `${p.x}%` }"
+            >
+              {{ p.label }}
+            </div>
           </div>
         </div>
       </Card>
