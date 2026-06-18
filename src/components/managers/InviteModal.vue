@@ -7,6 +7,7 @@ import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import FilterChips from '@/components/common/FilterChips.vue'
+import SelectField from '@/components/common/SelectField.vue'
 import { getErrorMessage } from '@/utils/error'
 
 const emit = defineEmits<{
@@ -15,6 +16,14 @@ const emit = defineEmits<{
 }>()
 
 const positions: { value: AdminPosition; label: string }[] = [
+  { value: 'PLANNER', label: '기획자' },
+  { value: 'DESIGNER', label: '디자이너' },
+  { value: 'DEVELOPER', label: '개발자' },
+]
+
+// 모바일 셀렉트용 옵션 (placeholder 포함)
+const positionSelectOptions = [
+  { value: '', label: '직군 선택' },
   { value: 'PLANNER', label: '기획자' },
   { value: 'DESIGNER', label: '디자이너' },
   { value: 'DEVELOPER', label: '개발자' },
@@ -59,7 +68,18 @@ const handleSubmit = async () => {
 
       <div>
         <label class="mb-1.5 block text-label1 font-medium text-grey-9">직군</label>
-        <FilterChips v-model="form.position" :options="positions" />
+        <!-- 모바일: 셀렉트 -->
+        <div class="md:hidden">
+          <SelectField
+            :model-value="form.position"
+            :options="positionSelectOptions"
+            @update:model-value="(v) => (form.position = v as AdminPosition | '')"
+          />
+        </div>
+        <!-- 데스크톱: 칩 -->
+        <div class="hidden md:block">
+          <FilterChips v-model="form.position" :options="positions" />
+        </div>
       </div>
     </form>
 
