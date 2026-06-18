@@ -5,7 +5,7 @@ import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import { authApi } from '@/api/auth.api'
 import { tokenStorage } from '@/utils/token'
-import type { ProblemDetail } from '@/types/api'
+import { getErrorMessage } from '@/utils/error'
 
 const router = useRouter()
 
@@ -26,8 +26,7 @@ const submitLogin = async () => {
     tokenStorage.setTokens(accessToken, refreshToken)
     await router.push('/dashboard')
   } catch (error: unknown) {
-    const problem = (error as any)?.response?.data as ProblemDetail | undefined
-    errorMessage.value = problem?.detail || '이메일과 비밀번호를 확인해주세요.'
+    errorMessage.value = getErrorMessage(error, '이메일과 비밀번호를 확인해주세요.')
   } finally {
     isLoading.value = false
   }
@@ -76,7 +75,7 @@ const submitLogin = async () => {
             {{ errorMessage }}
           </p>
 
-          <BaseButton type="submit" :disabled="!isFormValid || isLoading">
+          <BaseButton type="submit" size="lg" block :disabled="!isFormValid" :loading="isLoading">
             {{ isLoading ? '로그인 중' : '로그인' }}
           </BaseButton>
         </form>
