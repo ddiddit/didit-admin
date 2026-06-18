@@ -111,8 +111,8 @@ onMounted(fetchUser)
       <template v-if="userDetail">
         <!-- PC: 좌(정보·강제탈퇴) / 우(활동) 2단, 모바일: 세로 스택 -->
         <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
-          <!-- 왼쪽 -->
-          <div class="space-y-5">
+          <!-- 왼쪽 (긴 활동 스크롤 시 따라오도록 sticky) -->
+          <div class="space-y-5 lg:sticky lg:top-6 lg:self-start">
             <!-- 프로필 카드 -->
             <Card class="space-y-4">
               <div class="flex items-center justify-between">
@@ -151,7 +151,7 @@ onMounted(fetchUser)
           <Card class="space-y-4">
             <h3 class="text-label1 font-semibold text-grey-13">최근 활동 (최대 20건)</h3>
             <EmptyState v-if="userDetail.timeline.length === 0" message="활동 내역이 없습니다." />
-            <ol v-else class="relative ml-3 space-y-6 border-l border-grey-5 lg:max-h-[440px] lg:overflow-y-auto lg:pr-3">
+            <ol v-else class="relative ml-3 space-y-6 border-l border-grey-5">
               <li v-for="log in userDetail.timeline" :key="log.createdAt" class="ml-5">
                 <div class="absolute -left-1.5 mt-1 h-3 w-3 rounded-full border border-surface bg-grey-5" />
                 <div class="flex items-start justify-between gap-4">
