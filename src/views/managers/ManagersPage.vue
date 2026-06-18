@@ -80,7 +80,7 @@ onMounted(fetchAdmins)
     <div class="space-y-5">
       <PageHeader title="관리자 관리" :subtitle="`총 ${admins.length}명`">
         <template #actions>
-          <BaseButton variant="primary" @click="showInviteModal = true">
+          <BaseButton variant="primary" class="w-full sm:w-auto" @click="showInviteModal = true">
             <UserPlus class="h-4 w-4" />
             관리자 초대
           </BaseButton>

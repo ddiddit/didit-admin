@@ -140,7 +140,7 @@ onMounted(fetchNotices)
     <div class="space-y-5">
       <PageHeader title="공지사항" :subtitle="`총 ${notices.length}개`">
         <template #actions>
-          <BaseButton variant="primary" @click="openCreate">
+          <BaseButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
             <Plus class="h-4 w-4" />
             공지 등록
           </BaseButton>
