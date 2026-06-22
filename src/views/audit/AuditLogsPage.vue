@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import { ClipboardList } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
@@ -28,20 +28,16 @@ const columns = [
   { key: 'createdAt', label: '발생 시각', align: 'right' as const },
 ]
 
-const ACTION_OPTIONS = [
+// 액션 필터 옵션은 서버 응답(action·actionLabel)에서 누적 수집한다.
+// 별도 액션 목록 API가 없어, 조회된 로그에 등장한 액션을 모아 드롭다운을 구성한다.
+const actionLabelMap = ref<Record<string, string>>({})
+
+const ACTION_OPTIONS = computed(() => [
   { value: '', label: '전체 액션' },
-  { value: 'USER_LOGGED_IN', label: '로그인' },
-  { value: 'USER_SIGNED_UP', label: '회원가입' },
-  { value: 'USER_WITHDREW', label: '탈퇴' },
-  { value: 'USER_FORCE_WITHDREW', label: '강제 탈퇴' },
-  { value: 'RETROSPECTIVE_STARTED', label: '회고 시작' },
-  { value: 'RETROSPECTIVE_SAVED', label: '회고 저장' },
-  { value: 'BADGE_ACQUIRED', label: '배지 획득' },
-  { value: 'ADMIN_LOGGED_IN', label: '어드민 로그인' },
-  { value: 'INQUIRY_ANSWERED', label: '문의 답변' },
-  { value: 'NOTICE_REGISTERED', label: '공지 등록' },
-  { value: 'APP_CONFIG_UPDATED', label: '앱 설정 변경' },
-]
+  ...Object.entries(actionLabelMap.value)
+    .sort((a, b) => a[1].localeCompare(b[1], 'ko'))
+    .map(([value, label]) => ({ value, label })),
+])
 
 const ACTOR_OPTIONS = [
   { value: '', label: '전체 유형' },
@@ -50,7 +46,6 @@ const ACTOR_OPTIONS = [
   { value: 'SYSTEM', label: '시스템' },
 ]
 
-const actionLabel = (action: string) => ACTION_OPTIONS.find(o => o.value === action)?.label ?? action
 const actorTypeLabel = (type: string | null) =>
   !type ? '-' : ACTOR_OPTIONS.find(o => o.value === type)?.label ?? type
 
@@ -66,6 +61,10 @@ const fetchLogs = async (page = 0) => {
       page,
     })
     data.value = res.data.data
+    // 응답에 등장한 액션 라벨을 누적해 필터 옵션을 갱신한다.
+    for (const item of res.data.data.content) {
+      if (item.action) actionLabelMap.value[item.action] = item.actionLabel || item.action
+    }
     currentPage.value = page
   } catch (error: unknown) {
     toast.error(getErrorMessage(error, '감사 로그를 불러오지 못했습니다.'))
@@ -108,7 +107,7 @@ onMounted(() => fetchLogs(0))
         :empty-icon="ClipboardList"
       >
         <template #cell-action="{ row }">
-          <span class="font-medium">{{ actionLabel(row.action) }}</span>
+          <span class="font-medium">{{ row.actionLabel || row.action }}</span>
         </template>
         <template #cell-actorType="{ row }">
           <Badge :tone="actorTone(row.actorType)">{{ actorTypeLabel(row.actorType) }}</Badge>
