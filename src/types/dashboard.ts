@@ -27,8 +27,11 @@ export interface DashboardStats {
   dau: number
   todayRetrospects: number
   weeklyRetroTrend: DailyRetroCount[]
+  todayCompletionRate: number // 오늘 완료율(%)
   totalInputTokens: number
   totalOutputTokens: number
+  todayInputTokens: number // 오늘(완료일 기준) 입력 토큰
+  todayOutputTokens: number // 오늘(완료일 기준) 출력 토큰
   textAnswerCount: number
   voiceAnswerCount: number
   recentUsers: RecentUser[]
