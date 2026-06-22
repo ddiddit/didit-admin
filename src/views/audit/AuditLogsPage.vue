@@ -50,7 +50,6 @@ const ACTOR_OPTIONS = [
   { value: 'SYSTEM', label: '시스템' },
 ]
 
-const actionLabel = (action: string) => ACTION_OPTIONS.find(o => o.value === action)?.label ?? action
 const actorTypeLabel = (type: string | null) =>
   !type ? '-' : ACTOR_OPTIONS.find(o => o.value === type)?.label ?? type
 
@@ -108,7 +107,7 @@ onMounted(() => fetchLogs(0))
         :empty-icon="ClipboardList"
       >
         <template #cell-action="{ row }">
-          <span class="font-medium">{{ actionLabel(row.action) }}</span>
+          <span class="font-medium">{{ row.actionLabel || row.action }}</span>
         </template>
         <template #cell-actorType="{ row }">
           <Badge :tone="actorTone(row.actorType)">{{ actorTypeLabel(row.actorType) }}</Badge>

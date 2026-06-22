@@ -1,5 +1,6 @@
 export interface AuditLogItem {
   action: string
+  actionLabel: string
   actorId: string | null
   actorType: string | null
   targetId: string | null
