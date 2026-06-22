@@ -27,6 +27,10 @@ export interface DashboardStats {
   dau: number
   todayRetrospects: number
   weeklyRetroTrend: DailyRetroCount[]
+  totalInputTokens: number
+  totalOutputTokens: number
+  textAnswerCount: number
+  voiceAnswerCount: number
   recentUsers: RecentUser[]
   recentInquiries: RecentInquiry[]
 }
