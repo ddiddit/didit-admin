@@ -24,8 +24,6 @@ const actions = ref<AuditActionOption[]>([])
 const columns = [
   { key: 'action', label: '액션', align: 'left' as const },
   { key: 'actorType', label: '유형', align: 'center' as const },
-  { key: 'actorId', label: 'Actor ID', align: 'left' as const, hideBelow: 'md' as const },
-  { key: 'targetType', label: 'Target', align: 'left' as const, hideBelow: 'lg' as const },
   { key: 'createdAt', label: '발생 시각', align: 'right' as const },
 ]
 
@@ -129,7 +127,7 @@ onMounted(() => {
         :columns="columns"
         :rows="data?.content ?? []"
         :row-key="(_, idx) => idx"
-        min-width="min-w-[700px]"
+        min-width="min-w-[420px]"
         :loading="isLoading"
         empty-message="로그가 없습니다."
         :empty-icon="ClipboardList"
@@ -139,12 +137,6 @@ onMounted(() => {
         </template>
         <template #cell-actorType="{ row }">
           <Badge :tone="actorTone(row.actorType)">{{ actorTypeLabel(row.actorType) }}</Badge>
-        </template>
-        <template #cell-actorId="{ row }">
-          <span class="font-mono text-caption1 text-grey-7">{{ row.actorId ? row.actorId.slice(0, 8) + '…' : '-' }}</span>
-        </template>
-        <template #cell-targetType="{ row }">
-          <span class="text-caption1 text-grey-7">{{ row.targetType || '-' }}</span>
         </template>
         <template #cell-createdAt="{ row }">
           <span class="whitespace-nowrap text-caption1 text-grey-7">{{ formatDateTimeSec(row.createdAt) }}</span>
