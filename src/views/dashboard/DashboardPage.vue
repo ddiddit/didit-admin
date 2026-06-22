@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Users, FileText, MessageSquare, TrendingUp, Activity, BookOpen, Type, Mic, ArrowUpFromLine, ArrowDownToLine, Sigma, Gauge } from 'lucide-vue-next'
+import { Users, FileText, MessageSquare, TrendingUp, Activity, BookOpen, Coins } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
@@ -12,6 +12,7 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import { dashboardApi } from '@/api/dashboard.api'
 import type { DashboardStats, DailyRetroCount } from '@/types/dashboard'
 import { formatDate, formatNumber } from '@/utils/format'
+import { estimateTokenCost, formatWon } from '@/utils/pricing'
 import { getErrorMessage } from '@/utils/error'
 
 const router = useRouter()
@@ -21,35 +22,30 @@ const isLoading = ref(false)
 interface Metric {
   label: string
   value: number | undefined
+  valueText?: string // 숫자 대신 직접 표시할 문자열(예: 비용 '1,003원')
   icon: Component
   iconClass: string
   highlight?: boolean
 }
 
-const metrics = computed<Metric[]>(() => [
+// 상단 — 사용자 · 운영 지표
+const userOpsMetrics = computed<Metric[]>(() => [
   { label: '총 가입자', value: stats.value?.totalUsers, icon: Users, iconClass: 'text-grey-6' },
   { label: '오늘 신규', value: stats.value?.newUsersToday, icon: TrendingUp, iconClass: 'text-primary' },
   { label: 'DAU', value: stats.value?.dau, icon: Activity, iconClass: 'text-info' },
-  { label: '총 회고', value: stats.value?.totalRetrospects, icon: FileText, iconClass: 'text-grey-6' },
-  { label: '오늘 회고', value: stats.value?.todayRetrospects, icon: BookOpen, iconClass: 'text-primary' },
   { label: '미답변 문의', value: stats.value?.unansweredInquiries, icon: MessageSquare, iconClass: 'text-danger', highlight: true },
 ])
 
-// AI 사용 현황 지표 (답변 유형·토큰 사용량)
-const usageMetrics = computed<Metric[]>(() => {
+// 하단 — 회고 지표 (토큰은 비용으로 환산해 표시, 상세는 회고 통계 페이지에서)
+const retroMetrics = computed<Metric[]>(() => {
   const inTok = stats.value?.totalInputTokens
   const outTok = stats.value?.totalOutputTokens
-  const totalTok = inTok != null && outTok != null ? inTok + outTok : undefined
-  const retros = stats.value?.totalRetrospects
-  // 1회고당 평균 토큰(입력+출력) — 비용 감각용 요약 지표
-  const avgPerRetro = totalTok != null && retros ? Math.round(totalTok / retros) : undefined
+  // 토큰 → 예상 비용(원). 단가는 utils/pricing.ts (프론트 계산)
+  const cost = inTok != null && outTok != null ? estimateTokenCost(inTok, outTok) : undefined
   return [
-    { label: '텍스트 답변', value: stats.value?.textAnswerCount, icon: Type, iconClass: 'text-grey-6' },
-    { label: '음성 답변', value: stats.value?.voiceAnswerCount, icon: Mic, iconClass: 'text-primary' },
-    { label: '입력 토큰', value: inTok, icon: ArrowUpFromLine, iconClass: 'text-info' },
-    { label: '출력 토큰', value: outTok, icon: ArrowDownToLine, iconClass: 'text-info' },
-    { label: '총 토큰', value: totalTok, icon: Sigma, iconClass: 'text-grey-6' },
-    { label: '1회고당 평균 토큰', value: avgPerRetro, icon: Gauge, iconClass: 'text-primary' },
+    { label: '총 회고', value: stats.value?.totalRetrospects, icon: FileText, iconClass: 'text-grey-6' },
+    { label: '오늘 회고', value: stats.value?.todayRetrospects, icon: BookOpen, iconClass: 'text-primary' },
+    { label: 'AI 비용(누적)', value: undefined, valueText: cost != null ? formatWon(cost) : '-', icon: Coins, iconClass: 'text-info' },
   ]
 })
 
@@ -131,87 +127,26 @@ onMounted(fetchStats)
     <div class="space-y-6">
       <PageHeader title="대시보드" subtitle="서비스 현황을 한눈에 확인하세요." />
 
-      <!-- 지표 카드 -->
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Card v-for="metric in metrics" :key="metric.label" :padded="false" class="space-y-2 px-4 py-3.5">
-          <div class="flex items-center justify-between">
-            <p class="text-caption1 text-grey-7">{{ metric.label }}</p>
-            <component :is="metric.icon" class="h-3.5 w-3.5" :class="metric.iconClass" />
-          </div>
-          <p
-            class="text-heading2 font-bold"
-            :class="metric.highlight && (metric.value ?? 0) > 0 ? 'text-danger' : 'text-grey-13'"
-          >
-            {{ formatNumber(metric.value) }}
-          </p>
-        </Card>
-      </div>
-
-      <!-- AI 사용 현황 (답변 유형·토큰 사용량) -->
+      <!-- 상단: 사용자 · 운영 -->
       <div>
-        <h3 class="mb-3 text-label1 font-semibold text-grey-13">AI 사용 현황</h3>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <Card v-for="metric in usageMetrics" :key="metric.label" :padded="false" class="space-y-2 px-4 py-3.5">
+        <h3 class="mb-3 text-label1 font-semibold text-grey-13">사용자 · 운영</h3>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Card v-for="metric in userOpsMetrics" :key="metric.label" :padded="false" class="space-y-2 px-4 py-3.5">
             <div class="flex items-center justify-between">
               <p class="text-caption1 text-grey-7">{{ metric.label }}</p>
               <component :is="metric.icon" class="h-3.5 w-3.5" :class="metric.iconClass" />
             </div>
-            <p class="text-heading2 font-bold text-grey-13">{{ formatNumber(metric.value) }}</p>
+            <p
+              class="text-heading2 font-bold"
+              :class="metric.highlight && (metric.value ?? 0) > 0 ? 'text-danger' : 'text-grey-13'"
+            >
+              {{ metric.valueText ?? formatNumber(metric.value) }}
+            </p>
           </Card>
         </div>
       </div>
 
-      <!-- 주간 회고 추이 (꺾은선+영역 차트) -->
-      <Card>
-        <h3 class="mb-6 text-label1 font-semibold text-grey-13">주간 회고 추이 (최근 7일)</h3>
-        <div class="relative w-full" style="height: 200px">
-          <!-- 플롯 영역: 값 라벨(위)·날짜 라벨(아래) 공간 확보 -->
-          <div class="absolute inset-x-1 bottom-7 top-7">
-            <svg class="h-full w-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path :d="areaPath" class="fill-primary/10" />
-              <polyline
-                :points="linePoints"
-                fill="none"
-                class="stroke-primary"
-                stroke-width="2"
-                stroke-linejoin="round"
-                stroke-linecap="round"
-                vector-effect="non-scaling-stroke"
-              />
-            </svg>
-
-            <!-- 데이터 점 -->
-            <div
-              v-for="(p, i) in chartPoints"
-              :key="`dot-${i}`"
-              class="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-2 ring-surface"
-              :style="{ left: `${p.x}%`, top: `${p.y}%` }"
-            />
-
-            <!-- 값 라벨 -->
-            <div
-              v-for="(p, i) in chartPoints"
-              :key="`val-${i}`"
-              class="absolute -mt-2.5 -translate-x-1/2 -translate-y-full text-caption2 font-medium text-grey-8"
-              :style="{ left: `${p.x}%`, top: `${p.y}%` }"
-            >
-              {{ p.count }}
-            </div>
-
-            <!-- 날짜 라벨 -->
-            <div
-              v-for="(p, i) in chartPoints"
-              :key="`label-${i}`"
-              class="absolute top-full mt-2 -translate-x-1/2 whitespace-nowrap text-caption2 text-grey-6"
-              :style="{ left: `${p.x}%` }"
-            >
-              {{ p.label }}
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <!-- 최근 활동 -->
+      <!-- 상단: 최근 가입 유저 / 최근 문의 -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <!-- 최근 가입 유저 -->
         <Card>
@@ -268,6 +203,70 @@ onMounted(fetchStats)
           </ul>
         </Card>
       </div>
+
+      <!-- 하단: 회고 -->
+      <div>
+        <h3 class="mb-3 text-label1 font-semibold text-grey-13">회고</h3>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <Card v-for="metric in retroMetrics" :key="metric.label" :padded="false" class="space-y-2 px-4 py-3.5">
+            <div class="flex items-center justify-between">
+              <p class="text-caption1 text-grey-7">{{ metric.label }}</p>
+              <component :is="metric.icon" class="h-3.5 w-3.5" :class="metric.iconClass" />
+            </div>
+            <p class="text-heading2 font-bold text-grey-13">{{ metric.valueText ?? formatNumber(metric.value) }}</p>
+          </Card>
+        </div>
+      </div>
+
+      <!-- 하단: 주간 회고 추이 (꺾은선+영역 차트) -->
+      <Card>
+        <h3 class="mb-6 text-label1 font-semibold text-grey-13">주간 회고 추이 (최근 7일)</h3>
+        <div class="relative w-full" style="height: 200px">
+          <!-- 플롯 영역: 값 라벨(위)·날짜 라벨(아래) 공간 확보 -->
+          <div class="absolute inset-x-1 bottom-7 top-7">
+            <svg class="h-full w-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path :d="areaPath" class="fill-primary/10" />
+              <polyline
+                :points="linePoints"
+                fill="none"
+                class="stroke-primary"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                vector-effect="non-scaling-stroke"
+              />
+            </svg>
+
+            <!-- 데이터 점 -->
+            <div
+              v-for="(p, i) in chartPoints"
+              :key="`dot-${i}`"
+              class="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-2 ring-surface"
+              :style="{ left: `${p.x}%`, top: `${p.y}%` }"
+            />
+
+            <!-- 값 라벨 -->
+            <div
+              v-for="(p, i) in chartPoints"
+              :key="`val-${i}`"
+              class="absolute -mt-2.5 -translate-x-1/2 -translate-y-full text-caption2 font-medium text-grey-8"
+              :style="{ left: `${p.x}%`, top: `${p.y}%` }"
+            >
+              {{ p.count }}
+            </div>
+
+            <!-- 날짜 라벨 -->
+            <div
+              v-for="(p, i) in chartPoints"
+              :key="`label-${i}`"
+              class="absolute top-full mt-2 -translate-x-1/2 whitespace-nowrap text-caption2 text-grey-6"
+              :style="{ left: `${p.x}%` }"
+            >
+              {{ p.label }}
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   </DashboardLayout>
 </template>

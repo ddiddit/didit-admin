@@ -8,11 +8,15 @@ import PageHeader from '@/components/common/PageHeader.vue'
 import Card from '@/components/common/Card.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { retrospectiveStatsApi } from '@/api/retrospectiveStats.api'
+import { dashboardApi } from '@/api/dashboard.api'
 import type { RetrospectiveStats, DailyRetroCount } from '@/types/retrospectiveStats'
+import type { DashboardStats } from '@/types/dashboard'
 import { formatNumber } from '@/utils/format'
+import { estimateTokenCost, formatWon } from '@/utils/pricing'
 import { getErrorMessage } from '@/utils/error'
 
 const stats = ref<RetrospectiveStats | null>(null)
+const dash = ref<DashboardStats | null>(null) // 토큰/비용 출처 (전역 누적)
 const isLoading = ref(false)
 
 interface Metric {
@@ -95,11 +99,38 @@ const trendArea = computed(() => {
   return d
 })
 
+// 토큰/비용은 대시보드 통계(전역 누적)에서 가져온다.
+// TODO(백엔드): 회고 통계 응답에 토큰 필드가 추가되면 이 별도 호출을 제거하고 통합.
+const tokenRows = computed(() => {
+  const inTok = dash.value?.totalInputTokens ?? 0
+  const outTok = dash.value?.totalOutputTokens ?? 0
+  return [
+    { label: '입력', tokens: inTok, cost: estimateTokenCost(inTok, 0) },
+    { label: '출력', tokens: outTok, cost: estimateTokenCost(0, outTok) },
+    { label: '합계', tokens: inTok + outTok, cost: estimateTokenCost(inTok, outTok), total: true },
+  ]
+})
+// 1회고당 평균 토큰·비용 (전체 회고 수 기준)
+const perRetro = computed(() => {
+  const total = stats.value?.total ?? 0
+  const inTok = dash.value?.totalInputTokens ?? 0
+  const outTok = dash.value?.totalOutputTokens ?? 0
+  if (!total) return null
+  return {
+    tokens: Math.round((inTok + outTok) / total),
+    cost: estimateTokenCost(inTok, outTok) / total,
+  }
+})
+
 const fetchStats = async () => {
   isLoading.value = true
   try {
-    const res = await retrospectiveStatsApi.getStats()
-    stats.value = res.data.data
+    const [retroRes, dashRes] = await Promise.all([
+      retrospectiveStatsApi.getStats(),
+      dashboardApi.getStats(),
+    ])
+    stats.value = retroRes.data.data
+    dash.value = dashRes.data.data
   } catch (error: unknown) {
     toast.error(getErrorMessage(error, '회고 통계를 불러오지 못했습니다.'))
   } finally {
@@ -165,6 +196,34 @@ onMounted(fetchStats)
               </li>
             </ul>
           </div>
+        </Card>
+
+        <!-- AI 토큰 · 비용 -->
+        <Card class="space-y-4">
+          <h3 class="text-label1 font-semibold text-grey-13">AI 토큰 · 비용</h3>
+          <div class="overflow-hidden rounded-xl border border-grey-4">
+            <table class="w-full text-left">
+              <thead class="bg-grey-3 text-caption1 text-grey-7">
+                <tr>
+                  <th class="px-4 py-2.5 font-medium">구분</th>
+                  <th class="px-4 py-2.5 text-right font-medium">토큰</th>
+                  <th class="px-4 py-2.5 text-right font-medium">예상 비용</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-grey-4">
+                <tr v-for="row in tokenRows" :key="row.label" :class="row.total ? 'bg-grey-2 font-semibold' : ''">
+                  <td class="px-4 py-2.5 text-label1 text-grey-13">{{ row.label }}</td>
+                  <td class="px-4 py-2.5 text-right text-label1 text-grey-13 tabular-nums">{{ formatNumber(row.tokens) }}</td>
+                  <td class="px-4 py-2.5 text-right text-label1 text-grey-13 tabular-nums">{{ formatWon(row.cost) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="perRetro" class="flex flex-wrap gap-x-8 gap-y-1 text-caption1 text-grey-7">
+            <span>1회고당 평균 토큰 <b class="text-grey-13">{{ formatNumber(perRetro.tokens) }}</b></span>
+            <span>1회고당 평균 비용 <b class="text-grey-13">{{ formatWon(perRetro.cost) }}</b></span>
+          </div>
+          <p class="text-caption2 text-grey-6">* 단가: HCX-005 입력 1.25원 / 출력 5원 (1,000토큰 기준)</p>
         </Card>
 
         <!-- 최근 30일 완료 추이 (라인+영역 차트) -->
