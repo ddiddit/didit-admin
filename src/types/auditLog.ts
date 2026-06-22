@@ -15,3 +15,9 @@ export interface AuditLogsPage {
   totalPages: number
   page: number
 }
+
+export interface AuditActionOption {
+  action: string
+  label: string
+  actorType: 'USER' | 'ADMIN' | 'SYSTEM'
+}

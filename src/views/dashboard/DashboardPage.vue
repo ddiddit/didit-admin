@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Users, FileText, MessageSquare, TrendingUp, Activity, BookOpen } from 'lucide-vue-next'
+import { Users, FileText, MessageSquare, TrendingUp, Activity, BookOpen, Type, Mic, ArrowUpFromLine, ArrowDownToLine } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
@@ -33,6 +33,14 @@ const metrics = computed<Metric[]>(() => [
   { label: '총 회고', value: stats.value?.totalRetrospects, icon: FileText, iconClass: 'text-grey-6' },
   { label: '오늘 회고', value: stats.value?.todayRetrospects, icon: BookOpen, iconClass: 'text-primary' },
   { label: '미답변 문의', value: stats.value?.unansweredInquiries, icon: MessageSquare, iconClass: 'text-danger', highlight: true },
+])
+
+// AI 사용 현황 지표 (답변 유형·토큰 사용량)
+const usageMetrics = computed<Metric[]>(() => [
+  { label: '텍스트 답변', value: stats.value?.textAnswerCount, icon: Type, iconClass: 'text-grey-6' },
+  { label: '음성 답변', value: stats.value?.voiceAnswerCount, icon: Mic, iconClass: 'text-primary' },
+  { label: '입력 토큰', value: stats.value?.totalInputTokens, icon: ArrowUpFromLine, iconClass: 'text-info' },
+  { label: '출력 토큰', value: stats.value?.totalOutputTokens, icon: ArrowDownToLine, iconClass: 'text-info' },
 ])
 
 const inquiryTypeLabel = (type: string) => {
@@ -127,6 +135,20 @@ onMounted(fetchStats)
             {{ formatNumber(metric.value) }}
           </p>
         </Card>
+      </div>
+
+      <!-- AI 사용 현황 (답변 유형·토큰 사용량) -->
+      <div>
+        <h3 class="mb-3 text-label1 font-semibold text-grey-13">AI 사용 현황</h3>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Card v-for="metric in usageMetrics" :key="metric.label" :padded="false" class="space-y-2 px-4 py-3.5">
+            <div class="flex items-center justify-between">
+              <p class="text-caption1 text-grey-7">{{ metric.label }}</p>
+              <component :is="metric.icon" class="h-3.5 w-3.5" :class="metric.iconClass" />
+            </div>
+            <p class="text-heading2 font-bold text-grey-13">{{ formatNumber(metric.value) }}</p>
+          </Card>
+        </div>
       </div>
 
       <!-- 주간 회고 추이 (꺾은선+영역 차트) -->

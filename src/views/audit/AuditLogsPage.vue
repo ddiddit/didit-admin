@@ -10,7 +10,7 @@ import Badge from '@/components/common/Badge.vue'
 import SelectField from '@/components/common/SelectField.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { auditLogApi } from '@/api/auditLog.api'
-import type { AuditLogsPage } from '@/types/auditLog'
+import type { AuditLogsPage, AuditActionOption } from '@/types/auditLog'
 import { formatDateTimeSec } from '@/utils/format'
 import { getErrorMessage } from '@/utils/error'
 
@@ -19,6 +19,7 @@ const isLoading = ref(false)
 const filterAction = ref('')
 const filterActorType = ref('')
 const currentPage = ref(0)
+const actions = ref<AuditActionOption[]>([])
 
 const columns = [
   { key: 'action', label: '액션', align: 'left' as const },
@@ -28,17 +29,6 @@ const columns = [
   { key: 'createdAt', label: '발생 시각', align: 'right' as const },
 ]
 
-// 액션 필터 옵션은 서버 응답(action·actionLabel)에서 누적 수집한다.
-// 별도 액션 목록 API가 없어, 조회된 로그에 등장한 액션을 모아 드롭다운을 구성한다.
-const actionLabelMap = ref<Record<string, string>>({})
-
-const ACTION_OPTIONS = computed(() => [
-  { value: '', label: '전체 액션' },
-  ...Object.entries(actionLabelMap.value)
-    .sort((a, b) => a[1].localeCompare(b[1], 'ko'))
-    .map(([value, label]) => ({ value, label })),
-])
-
 const ACTOR_OPTIONS = [
   { value: '', label: '전체 유형' },
   { value: 'USER', label: '사용자' },
@@ -46,11 +36,36 @@ const ACTOR_OPTIONS = [
   { value: 'SYSTEM', label: '시스템' },
 ]
 
+// 액션 옵션은 전체 액션 목록 API로 구성한다.
+// 유형(actorType)이 선택돼 있으면 해당 유형의 액션만 노출한다.
+const ACTION_OPTIONS = computed(() => {
+  const filtered = filterActorType.value
+    ? actions.value.filter((a) => a.actorType === filterActorType.value)
+    : actions.value
+  return [
+    { value: '', label: '전체 액션' },
+    ...filtered
+      .slice()
+      .sort((a, b) => a.label.localeCompare(b.label, 'ko'))
+      .map((a) => ({ value: a.action, label: a.label })),
+  ]
+})
+
 const actorTypeLabel = (type: string | null) =>
   !type ? '-' : ACTOR_OPTIONS.find(o => o.value === type)?.label ?? type
 
 const actorTone = (type: string | null): 'green' | 'yellow' | 'grey' =>
   type === 'USER' ? 'green' : type === 'ADMIN' ? 'yellow' : 'grey'
+
+// 전체 액션 목록 로드 (드롭다운 구성용). 실패해도 조회 자체엔 영향 없으므로 조용히 무시한다.
+const fetchActions = async () => {
+  try {
+    const res = await auditLogApi.actions()
+    actions.value = res.data.data
+  } catch {
+    // 액션 목록 로드 실패 — 필터만 비활성, 로그 조회는 정상 동작
+  }
+}
 
 const fetchLogs = async (page = 0) => {
   isLoading.value = true
@@ -61,10 +76,6 @@ const fetchLogs = async (page = 0) => {
       page,
     })
     data.value = res.data.data
-    // 응답에 등장한 액션 라벨을 누적해 필터 옵션을 갱신한다.
-    for (const item of res.data.data.content) {
-      if (item.action) actionLabelMap.value[item.action] = item.actionLabel || item.action
-    }
     currentPage.value = page
   } catch (error: unknown) {
     toast.error(getErrorMessage(error, '감사 로그를 불러오지 못했습니다.'))
@@ -73,7 +84,24 @@ const fetchLogs = async (page = 0) => {
   }
 }
 
-onMounted(() => fetchLogs(0))
+// 유형 변경 시 현재 선택된 액션이 그 유형에 속하지 않으면 액션 필터를 초기화한다.
+const onActorTypeChange = (v: string) => {
+  filterActorType.value = v
+  if (filterAction.value && !ACTION_OPTIONS.value.some((o) => o.value === filterAction.value)) {
+    filterAction.value = ''
+  }
+  fetchLogs(0)
+}
+
+const onActionChange = (v: string) => {
+  filterAction.value = v
+  fetchLogs(0)
+}
+
+onMounted(() => {
+  fetchActions()
+  fetchLogs(0)
+})
 </script>
 
 <template>
@@ -83,17 +111,17 @@ onMounted(() => fetchLogs(0))
     <div class="space-y-5">
       <PageHeader title="감사 로그" subtitle="사용자 및 어드민의 주요 행동 기록을 조회합니다." />
 
-      <!-- 필터 (선택 즉시 조회) -->
+      <!-- 필터 (선택 즉시 조회) — 유형(상위)이 왼쪽, 액션이 오른쪽 -->
       <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <SelectField
-          :model-value="filterAction"
-          :options="ACTION_OPTIONS"
-          @update:model-value="(v) => { filterAction = v; fetchLogs(0) }"
-        />
         <SelectField
           :model-value="filterActorType"
           :options="ACTOR_OPTIONS"
-          @update:model-value="(v) => { filterActorType = v; fetchLogs(0) }"
+          @update:model-value="onActorTypeChange"
+        />
+        <SelectField
+          :model-value="filterAction"
+          :options="ACTION_OPTIONS"
+          @update:model-value="onActionChange"
         />
       </div>
 

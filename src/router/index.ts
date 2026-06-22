@@ -15,6 +15,7 @@ import BadgesPage from '@/views/badges/BadgesPage.vue'
 import PromptsPage from '@/views/prompts/PromptsPage.vue'
 import PromptEditPage from '@/views/prompts/PromptEditPage.vue'
 import WithdrawalStatsPage from '@/views/withdrawal/WithdrawalStatsPage.vue'
+import RetrospectiveStatsPage from '@/views/retrospective/RetrospectiveStatsPage.vue'
 import AuditLogsPage from '@/views/audit/AuditLogsPage.vue'
 
 import { tokenStorage } from '@/utils/token'
@@ -114,6 +115,12 @@ const router = createRouter({
             path: '/withdrawal-stats',
             name: 'withdrawal-stats',
             component: WithdrawalStatsPage,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/retrospective-stats',
+            name: 'retrospective-stats',
+            component: RetrospectiveStatsPage,
             meta: { requiresAuth: true },
         },
         {
