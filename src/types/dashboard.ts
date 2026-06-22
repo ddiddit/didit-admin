@@ -32,6 +32,8 @@ export interface DashboardStats {
   totalOutputTokens: number
   todayInputTokens: number // 오늘(완료일 기준) 입력 토큰
   todayOutputTokens: number // 오늘(완료일 기준) 출력 토큰
+  monthInputTokens: number // 이번달(완료일 기준) 입력 토큰
+  monthOutputTokens: number // 이번달(완료일 기준) 출력 토큰
   textAnswerCount: number
   voiceAnswerCount: number
   recentUsers: RecentUser[]

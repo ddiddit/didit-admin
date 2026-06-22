@@ -36,18 +36,18 @@ const userOpsMetrics = computed<Metric[]>(() => [
   { label: '미답변 문의', value: stats.value?.unansweredInquiries, icon: MessageSquare, iconClass: 'text-danger', highlight: true },
 ])
 
-// 하단 — 회고 지표 (오늘 기준 스냅샷. 누적 토큰·비용 상세는 회고 통계 페이지에서)
+// 하단 — 회고 지표 (회고 수·완료율은 오늘, AI 비용은 이번달 기준)
 const retroMetrics = computed<Metric[]>(() => {
-  const inTok = stats.value?.todayInputTokens
-  const outTok = stats.value?.todayOutputTokens
-  // 오늘 토큰 → 예상 비용(원). 단가는 utils/pricing.ts (프론트 계산)
+  const inTok = stats.value?.monthInputTokens
+  const outTok = stats.value?.monthOutputTokens
+  // 이번달 토큰 → 예상 비용(원). 단가는 utils/pricing.ts (프론트 계산)
   const cost = inTok != null && outTok != null ? estimateTokenCost(inTok, outTok) : undefined
   const rate = stats.value?.todayCompletionRate
   return [
     { label: '총 회고', value: stats.value?.totalRetrospects, icon: FileText, iconClass: 'text-grey-6' },
     { label: '오늘 회고', value: stats.value?.todayRetrospects, icon: BookOpen, iconClass: 'text-primary' },
     { label: '오늘 완료율', value: undefined, valueText: rate != null ? `${rate.toFixed(1)}%` : '-', icon: Percent, iconClass: 'text-primary' },
-    { label: '오늘 AI 비용', value: undefined, valueText: cost != null ? formatWon(cost) : '-', icon: Coins, iconClass: 'text-info' },
+    { label: '이번달 AI 비용', value: undefined, valueText: cost != null ? formatWon(cost) : '-', icon: Coins, iconClass: 'text-info' },
   ]
 })
 
