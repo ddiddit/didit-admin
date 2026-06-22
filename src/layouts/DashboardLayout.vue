@@ -113,9 +113,6 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
             <RouterLink to="/badges" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <Award class="w-4 h-4 flex-shrink-0" />배지 관리
             </RouterLink>
-            <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE">
-              <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
-            </RouterLink>
           </div>
         </div>
 
@@ -126,8 +123,8 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
             <RouterLink to="/retrospective-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <LineChart class="w-4 h-4 flex-shrink-0" />회고 통계
             </RouterLink>
-            <RouterLink to="/audit-logs" :class="NAV_LINK" :active-class="NAV_ACTIVE">
-              <ClipboardList class="w-4 h-4 flex-shrink-0" />감사 로그
+            <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
             </RouterLink>
           </div>
         </div>
@@ -138,6 +135,9 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
           <div class="space-y-0.5">
             <RouterLink to="/prompts" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />프롬프트 관리
+            </RouterLink>
+            <RouterLink to="/audit-logs" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <ClipboardList class="w-4 h-4 flex-shrink-0" />감사 로그
             </RouterLink>
             <RouterLink v-if="isSuperAdmin" to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <User class="w-4 h-4 flex-shrink-0" />관리자 관리
@@ -231,9 +231,6 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
             <RouterLink to="/badges" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <Award class="w-4 h-4 flex-shrink-0" />배지 관리
             </RouterLink>
-            <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
-              <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
-            </RouterLink>
           </div>
         </div>
         <div>
@@ -242,8 +239,8 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
             <RouterLink to="/retrospective-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <LineChart class="w-4 h-4 flex-shrink-0" />회고 통계
             </RouterLink>
-            <RouterLink to="/audit-logs" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
-              <ClipboardList class="w-4 h-4 flex-shrink-0" />감사 로그
+            <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
             </RouterLink>
           </div>
         </div>
@@ -252,6 +249,9 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
           <div class="space-y-0.5">
             <RouterLink to="/prompts" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <SlidersHorizontal class="w-4 h-4 flex-shrink-0" />프롬프트 관리
+            </RouterLink>
+            <RouterLink to="/audit-logs" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <ClipboardList class="w-4 h-4 flex-shrink-0" />감사 로그
             </RouterLink>
             <RouterLink v-if="isSuperAdmin" to="/managers" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <User class="w-4 h-4 flex-shrink-0" />관리자 관리

@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Users, FileText, MessageSquare, TrendingUp, Activity, BookOpen, Type, Mic, ArrowUpFromLine, ArrowDownToLine } from 'lucide-vue-next'
+import { Users, FileText, MessageSquare, TrendingUp, Activity, BookOpen, Type, Mic, ArrowUpFromLine, ArrowDownToLine, Sigma, Gauge } from 'lucide-vue-next'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
@@ -36,12 +36,22 @@ const metrics = computed<Metric[]>(() => [
 ])
 
 // AI 사용 현황 지표 (답변 유형·토큰 사용량)
-const usageMetrics = computed<Metric[]>(() => [
-  { label: '텍스트 답변', value: stats.value?.textAnswerCount, icon: Type, iconClass: 'text-grey-6' },
-  { label: '음성 답변', value: stats.value?.voiceAnswerCount, icon: Mic, iconClass: 'text-primary' },
-  { label: '입력 토큰', value: stats.value?.totalInputTokens, icon: ArrowUpFromLine, iconClass: 'text-info' },
-  { label: '출력 토큰', value: stats.value?.totalOutputTokens, icon: ArrowDownToLine, iconClass: 'text-info' },
-])
+const usageMetrics = computed<Metric[]>(() => {
+  const inTok = stats.value?.totalInputTokens
+  const outTok = stats.value?.totalOutputTokens
+  const totalTok = inTok != null && outTok != null ? inTok + outTok : undefined
+  const retros = stats.value?.totalRetrospects
+  // 1회고당 평균 토큰(입력+출력) — 비용 감각용 요약 지표
+  const avgPerRetro = totalTok != null && retros ? Math.round(totalTok / retros) : undefined
+  return [
+    { label: '텍스트 답변', value: stats.value?.textAnswerCount, icon: Type, iconClass: 'text-grey-6' },
+    { label: '음성 답변', value: stats.value?.voiceAnswerCount, icon: Mic, iconClass: 'text-primary' },
+    { label: '입력 토큰', value: inTok, icon: ArrowUpFromLine, iconClass: 'text-info' },
+    { label: '출력 토큰', value: outTok, icon: ArrowDownToLine, iconClass: 'text-info' },
+    { label: '총 토큰', value: totalTok, icon: Sigma, iconClass: 'text-grey-6' },
+    { label: '1회고당 평균 토큰', value: avgPerRetro, icon: Gauge, iconClass: 'text-primary' },
+  ]
+})
 
 const inquiryTypeLabel = (type: string) => {
   const map: Record<string, string> = { USAGE: '이용 문의', BUG: '버그 신고', IMPROVEMENT: '개선 제안', ETC: '기타' }
@@ -140,7 +150,7 @@ onMounted(fetchStats)
       <!-- AI 사용 현황 (답변 유형·토큰 사용량) -->
       <div>
         <h3 class="mb-3 text-label1 font-semibold text-grey-13">AI 사용 현황</h3>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Card v-for="metric in usageMetrics" :key="metric.label" :padded="false" class="space-y-2 px-4 py-3.5">
             <div class="flex items-center justify-between">
               <p class="text-caption1 text-grey-7">{{ metric.label }}</p>
