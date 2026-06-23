@@ -164,7 +164,7 @@ onMounted(fetchStats)
         <Card class="space-y-4">
           <h3 class="text-label1 font-semibold text-grey-13">답변 유형 분포</h3>
           <EmptyState v-if="answerTotal === 0" message="답변 기록이 없습니다." />
-          <div v-else class="flex items-center gap-6">
+          <div v-else class="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
             <div class="relative h-32 w-32 shrink-0">
               <svg viewBox="0 0 36 36" class="h-full w-full -rotate-90">
                 <circle cx="18" cy="18" r="15.915" fill="none" class="stroke-grey-4" stroke-width="3.5" />
@@ -186,13 +186,13 @@ onMounted(fetchStats)
                 <span class="text-caption2 text-grey-6">총 답변</span>
               </div>
             </div>
-            <ul class="flex-1 space-y-2.5">
+            <ul class="w-full space-y-2.5 sm:flex-1">
               <li v-for="bar in answerBars" :key="bar.label" class="flex items-center gap-2">
                 <span class="h-2.5 w-2.5 shrink-0 rounded-full" :class="bar.dotClass" />
-                <component :is="bar.icon" class="h-3.5 w-3.5 text-grey-6" />
-                <span class="text-label1 text-grey-13">{{ bar.label }}</span>
-                <span class="ml-auto text-caption1 text-grey-7">{{ formatNumber(bar.count) }}건</span>
-                <span class="w-12 text-right text-label1 font-semibold text-grey-13">{{ bar.percentage.toFixed(1) }}%</span>
+                <component :is="bar.icon" class="h-3.5 w-3.5 shrink-0 text-grey-6" />
+                <span class="whitespace-nowrap text-label1 text-grey-13">{{ bar.label }}</span>
+                <span class="ml-auto whitespace-nowrap text-caption1 text-grey-7">{{ formatNumber(bar.count) }}건</span>
+                <span class="w-12 shrink-0 text-right text-label1 font-semibold text-grey-13">{{ bar.percentage.toFixed(1) }}%</span>
               </li>
             </ul>
           </div>
@@ -201,20 +201,20 @@ onMounted(fetchStats)
         <!-- AI 토큰 · 비용 -->
         <Card class="space-y-4">
           <h3 class="text-label1 font-semibold text-grey-13">AI 토큰 · 비용</h3>
-          <div class="overflow-hidden rounded-xl border border-grey-4">
-            <table class="w-full text-left">
+          <div class="overflow-x-auto rounded-xl border border-grey-4">
+            <table class="w-full text-center">
               <thead class="bg-grey-3 text-caption1 text-grey-7">
                 <tr>
-                  <th class="px-4 py-2.5 font-medium">구분</th>
-                  <th class="px-4 py-2.5 text-right font-medium">토큰</th>
-                  <th class="px-4 py-2.5 text-right font-medium">예상 비용</th>
+                  <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">구분</th>
+                  <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">토큰</th>
+                  <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">예상 비용</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-grey-4">
                 <tr v-for="row in tokenRows" :key="row.label" :class="row.total ? 'bg-grey-2 font-semibold' : ''">
-                  <td class="px-4 py-2.5 text-label1 text-grey-13">{{ row.label }}</td>
-                  <td class="px-4 py-2.5 text-right text-label1 text-grey-13 tabular-nums">{{ formatNumber(row.tokens) }}</td>
-                  <td class="px-4 py-2.5 text-right text-label1 text-grey-13 tabular-nums">{{ formatWon(row.cost) }}</td>
+                  <td class="whitespace-nowrap px-3 py-2.5 text-center text-label1 text-grey-13">{{ row.label }}</td>
+                  <td class="whitespace-nowrap px-3 py-2.5 text-center text-label1 text-grey-13 tabular-nums">{{ formatNumber(row.tokens) }}</td>
+                  <td class="whitespace-nowrap px-3 py-2.5 text-center text-label1 text-grey-13 tabular-nums">{{ formatWon(row.cost) }}</td>
                 </tr>
               </tbody>
             </table>
