@@ -11,7 +11,6 @@ import BadgeIcon from '@/components/badges/BadgeIcon.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import SelectField from '@/components/common/SelectField.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { badgesApi } from '@/api/badges.api'
 import type {
@@ -28,9 +27,8 @@ const badges = ref<BadgeType[]>([])
 const conditionMeta = ref<BadgeConditionMeta | null>(null)
 const isLoading = ref(false)
 const isSubmitting = ref(false)
-const isToggling = ref(false)
 
-// 획득자 모달
+// 획득 유저 모달
 const selectedBadge = ref<BadgeType | null>(null)
 const holders = ref<BadgeHolder[]>([])
 const isLoadingHolders = ref(false)
@@ -50,10 +48,6 @@ const form = ref({
   congratsMessage: '',
 })
 const formParams = ref<Record<string, string>>({})
-
-// 활성/비활성 토글 다이얼로그
-const showToggleDialog = ref(false)
-const toggleTarget = ref<BadgeType | null>(null)
 
 const columns = [
   { key: 'icon', label: '배지', align: 'center' as const, width: '10%' },
@@ -212,27 +206,6 @@ const handleSubmit = async () => {
   }
 }
 
-const openToggle = (badge: BadgeType) => {
-  toggleTarget.value = badge
-  showToggleDialog.value = true
-}
-
-const handleToggle = async () => {
-  if (!toggleTarget.value) return
-  const next = !toggleTarget.value.active
-  isToggling.value = true
-  try {
-    await badgesApi.changeActive(toggleTarget.value.id, next)
-    toast.success(next ? '배지가 활성화되었습니다.' : '배지가 비활성화되었습니다.')
-    showToggleDialog.value = false
-    await fetchBadges()
-  } catch (error: unknown) {
-    toast.error(getErrorMessage(error, '상태 변경에 실패했습니다.'))
-  } finally {
-    isToggling.value = false
-  }
-}
-
 const openHolders = async (badge: BadgeType) => {
   selectedBadge.value = badge
   holders.value = []
@@ -241,7 +214,7 @@ const openHolders = async (badge: BadgeType) => {
     const res = await badgesApi.holders(badge.id)
     holders.value = res.data.data
   } catch (error: unknown) {
-    toast.error(getErrorMessage(error, '획득자 목록을 불러오지 못했습니다.'))
+    toast.error(getErrorMessage(error, '획득 유저 목록을 불러오지 못했습니다.'))
   } finally {
     isLoadingHolders.value = false
   }
@@ -305,18 +278,7 @@ onMounted(async () => {
         <template #cell-action="{ row }">
           <div class="flex items-center justify-center gap-1.5">
             <BaseButton variant="ghost" size="sm" @click="openEdit(row)">수정</BaseButton>
-            <BaseButton variant="ghost" size="sm" @click="openHolders(row)">획득자</BaseButton>
-            <button
-              @click="openToggle(row)"
-              :class="[
-                'rounded-lg px-3 py-1.5 text-caption1 font-medium transition cursor-pointer',
-                row.active
-                  ? 'bg-grey-4 text-grey-7 hover:bg-danger/10 hover:text-danger'
-                  : 'bg-green-light text-green-dark hover:bg-primary/10',
-              ]"
-            >
-              {{ row.active ? '비활성화' : '활성화' }}
-            </button>
+            <BaseButton variant="ghost" size="sm" @click="openHolders(row)">획득 유저</BaseButton>
           </div>
         </template>
       </DataTable>
@@ -415,16 +377,16 @@ onMounted(async () => {
       </template>
     </BaseModal>
 
-    <!-- 획득자 모달 -->
+    <!-- 획득 유저 모달 -->
     <BaseModal
       v-if="selectedBadge"
       :show="true"
-      :title="`${selectedBadge.name} 획득자`"
+      :title="`${selectedBadge.name} 획득 유저`"
       :subtitle="`${formatNumber(selectedBadge.acquiredCount)}명 획득`"
       @close="closeHolders"
     >
       <div v-if="isLoadingHolders" class="py-8 text-center text-caption1 text-grey-7">불러오는 중...</div>
-      <EmptyState v-else-if="holders.length === 0" message="획득자가 없습니다." />
+      <EmptyState v-else-if="holders.length === 0" message="획득한 유저가 없습니다." />
       <ul v-else class="divide-y divide-grey-4">
         <li
           v-for="holder in holders"
@@ -440,20 +402,5 @@ onMounted(async () => {
       </ul>
     </BaseModal>
 
-    <!-- 활성/비활성 토글 -->
-    <ConfirmDialog
-      v-if="showToggleDialog"
-      :title="toggleTarget?.active ? '배지 비활성화' : '배지 활성화'"
-      :description="
-        toggleTarget?.active
-          ? `'${toggleTarget?.name}' 배지를 비활성화하시겠습니까?\n비활성화해도 데이터는 보존되며 사용자에게 노출되지 않습니다.`
-          : `'${toggleTarget?.name}' 배지를 활성화하시겠습니까?`
-      "
-      :confirm-text="toggleTarget?.active ? '비활성화' : '활성화'"
-      :is-danger="toggleTarget?.active"
-      :is-loading="isToggling"
-      @close="showToggleDialog = false"
-      @confirm="handleToggle"
-    />
   </DashboardLayout>
 </template>
