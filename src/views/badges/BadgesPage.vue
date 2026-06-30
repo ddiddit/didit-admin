@@ -7,6 +7,7 @@ import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Badge from '@/components/common/Badge.vue'
+import BadgeIcon from '@/components/badges/BadgeIcon.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import SelectField from '@/components/common/SelectField.vue'
@@ -287,7 +288,15 @@ onMounted(async () => {
         :empty-icon="Award"
       >
         <template #cell-name="{ row }">
-          <span class="font-medium">{{ row.name }}</span>
+          <div class="flex items-center gap-3">
+            <BadgeIcon
+              :name="row.name"
+              :condition-type="row.conditionType"
+              :icon-url="row.iconUrl"
+              :size="40"
+            />
+            <span class="font-medium">{{ row.name }}</span>
+          </div>
         </template>
         <template #cell-category="{ row }">
           <Badge tone="blue">{{ categoryLabel(row.category) }}</Badge>
@@ -332,6 +341,19 @@ onMounted(async () => {
       @close="showFormModal = false"
     >
       <div class="space-y-4">
+        <!-- 아이콘 미리보기 (이름/조건으로 매칭) -->
+        <div class="flex items-center gap-3 rounded-xl border border-grey-4 bg-grey-2 p-3">
+          <BadgeIcon
+            :name="form.name"
+            :condition-type="form.conditionType"
+            :icon-url="form.iconUrl"
+            :size="56"
+          />
+          <div class="min-w-0">
+            <p class="text-label1 font-medium text-grey-13">{{ form.name || '배지 미리보기' }}</p>
+            <p class="text-caption1 text-grey-7">이름·조건에 맞는 배지 아이콘이 표시됩니다.</p>
+          </div>
+        </div>
         <div>
           <label class="mb-1.5 block text-label1 font-medium text-grey-9">배지명</label>
           <input v-model="form.name" type="text" placeholder="배지명을 입력해주세요" :class="inputClass" />
