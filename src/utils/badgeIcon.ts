@@ -7,28 +7,38 @@
 
 interface BadgeIconDef {
   code: string // 이미지 파일명 (public/badges/{code}.svg)
-  name: string // 배지 이름 (백엔드 name과 매칭)
-  conditionType?: string // 백엔드 조건 타입 (있으면 우선 매칭)
+  name: string // 배지 이름 (백엔드 name과 매칭 — 10종 모두 고유)
+  conditionType?: string // 백엔드 조건 타입 (고유한 경우만 보조 매칭에 사용)
 }
 
-// 프론트 BADGE_CATALOG와 동일 (그리드 표시 순서)
+// 백엔드 시드(V39__redefine_badges_seed.sql) 기준 배지 10종.
+// name은 백엔드 name과 1:1로 매칭된다(모두 고유). conditionType은 CUMULATIVE_RETRO(3종)·
+// WEEKLY_STREAK(2종)처럼 여러 배지가 공유하므로 고유한 타입만 보조 매칭에 쓴다.
 const BADGE_ICON_CATALOG: BadgeIconDef[] = [
-  { code: 'first-record', name: '첫 기록', conditionType: 'FIRST_RETRO' },
-  { code: 'record-10', name: '10회 기록' },
-  { code: 'record-30', name: '30회 기록', conditionType: 'TOTAL_30' },
-  { code: 'project-collector', name: '프로젝트 컬렉터' },
-  { code: 'project-picker', name: '프로젝트 피커' },
-  { code: 'project-digger', name: '프로젝트 디기너' },
-  { code: 'routine-first', name: '루틴의 첫 걸음', conditionType: 'WEEKLY_3_FIRST' },
-  { code: 'routine-power', name: '루틴의 힘', conditionType: 'WEEKLY_3_THREE_WEEKS' },
-  { code: 'routine-streak', name: '루틴의 지속' },
-  { code: 'didit-lover', name: '디딧 러버' },
+  { code: 'first-record', name: '첫 기록', conditionType: 'CUMULATIVE_RETRO' },
+  { code: 'record-10', name: '10회 기록', conditionType: 'CUMULATIVE_RETRO' },
+  { code: 'record-30', name: '30회 기록', conditionType: 'CUMULATIVE_RETRO' },
+  { code: 'project-collector', name: '컬렉터', conditionType: 'PROJECT_COUNT' },
+  { code: 'project-picker', name: '피커', conditionType: 'PROJECT_TAGGED_RETRO' },
+  { code: 'project-digger', name: '디깅', conditionType: 'PROJECT_RETRO_IN_ONE' },
+  { code: 'routine-first', name: '루틴 첫걸음', conditionType: 'WEEKLY_RETRO_COUNT' },
+  { code: 'routine-power', name: '루틴의 힘', conditionType: 'WEEKLY_STREAK' },
+  { code: 'routine-streak', name: '루틴의 지속', conditionType: 'WEEKLY_STREAK' },
+  { code: 'didit-lover', name: '디딧 러버', conditionType: 'DAILY_ACCESS_STREAK' },
 ]
 
-const byConditionType = new Map(
-  BADGE_ICON_CATALOG.filter((d) => d.conditionType).map((d) => [d.conditionType as string, d]),
-)
 const byName = new Map(BADGE_ICON_CATALOG.map((d) => [d.name, d]))
+
+// conditionType이 정확히 하나의 배지에만 쓰일 때만 보조 매칭에 사용(공유 타입은 제외)
+const conditionTypeCount = BADGE_ICON_CATALOG.reduce<Map<string, number>>((acc, d) => {
+  if (d.conditionType) acc.set(d.conditionType, (acc.get(d.conditionType) ?? 0) + 1)
+  return acc
+}, new Map())
+const byConditionType = new Map(
+  BADGE_ICON_CATALOG.filter(
+    (d) => d.conditionType && conditionTypeCount.get(d.conditionType) === 1,
+  ).map((d) => [d.conditionType as string, d]),
+)
 
 export interface BadgeIconInput {
   name?: string | null
@@ -37,11 +47,11 @@ export interface BadgeIconInput {
 }
 
 // 배지에 대응하는 아이콘 경로를 찾는다.
-// 매칭 우선순위: conditionType → 이름 → 백엔드 iconUrl. 못 찾으면 null.
+// 매칭 우선순위: 이름(고유) → conditionType(고유한 것만) → 백엔드 iconUrl. 못 찾으면 null.
 export function resolveBadgeIcon(badge: BadgeIconInput): string | null {
   const def =
-    (badge.conditionType ? byConditionType.get(badge.conditionType) : undefined) ??
-    (badge.name ? byName.get(badge.name.trim()) : undefined)
+    (badge.name ? byName.get(badge.name.trim()) : undefined) ??
+    (badge.conditionType ? byConditionType.get(badge.conditionType) : undefined)
   if (def) return `/badges/${def.code}.svg`
   const url = badge.iconUrl?.trim()
   return url ? url : null
