@@ -16,6 +16,7 @@ import PromptsPage from '@/views/prompts/PromptsPage.vue'
 import PromptEditPage from '@/views/prompts/PromptEditPage.vue'
 import WithdrawalStatsPage from '@/views/withdrawal/WithdrawalStatsPage.vue'
 import RetrospectiveStatsPage from '@/views/retrospective/RetrospectiveStatsPage.vue'
+import AchievementStatsPage from '@/views/stats/AchievementStatsPage.vue'
 import AuditLogsPage from '@/views/audit/AuditLogsPage.vue'
 
 import { tokenStorage } from '@/utils/token'
@@ -121,6 +122,12 @@ const router = createRouter({
             path: '/retrospective-stats',
             name: 'retrospective-stats',
             component: RetrospectiveStatsPage,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: '/stats/achievements',
+            name: 'achievement-stats',
+            component: AchievementStatsPage,
             meta: { requiresAuth: true },
         },
         {
