@@ -57,11 +57,10 @@ const toggleTarget = ref<BadgeType | null>(null)
 
 const columns = [
   { key: 'icon', label: '배지', align: 'center' as const, width: '10%' },
-  { key: 'name', label: '배지명', align: 'left' as const, width: '28%' },
-  { key: 'category', label: '카테고리', align: 'center' as const, width: '18%' },
-  { key: 'active', label: '상태', align: 'center' as const, width: '14%' },
-  { key: 'acquiredCount', label: '획득 수', align: 'center' as const, width: '14%' },
-  { key: 'action', label: '액션', align: 'center' as const, width: '16%' },
+  { key: 'name', label: '배지명', align: 'left' as const, width: '30%' },
+  { key: 'category', label: '카테고리', align: 'center' as const, width: '20%' },
+  { key: 'acquiredCount', label: '획득 수', align: 'center' as const, width: '18%' },
+  { key: 'action', label: '액션', align: 'center' as const, width: '22%' },
 ]
 
 const categoryOptions = computed(() =>
@@ -300,9 +299,6 @@ onMounted(async () => {
         <template #cell-category="{ row }">
           <Badge tone="blue">{{ categoryLabel(row.category) }}</Badge>
         </template>
-        <template #cell-active="{ row }">
-          <Badge :tone="row.active ? 'green' : 'grey'">{{ row.active ? '활성' : '비활성' }}</Badge>
-        </template>
         <template #cell-acquiredCount="{ row }">
           <span class="font-semibold">{{ formatNumber(row.acquiredCount) }}</span>
         </template>
@@ -335,14 +331,13 @@ onMounted(async () => {
     >
       <div class="space-y-4">
         <!-- 배지 아이콘 미리보기 (이름·조건으로 매칭) -->
-        <div class="flex flex-col items-center gap-2 pb-1">
+        <div class="flex flex-col items-center pb-1">
           <BadgeIcon
             :name="form.name"
             :condition-type="form.conditionType"
             :icon-url="form.iconUrl"
             :size="88"
           />
-          <p class="text-caption1 text-grey-7">이름·조건에 맞는 배지 미리보기</p>
         </div>
         <div>
           <label class="mb-1.5 block text-label1 font-medium text-grey-9">배지명</label>
@@ -395,10 +390,6 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div>
-          <label class="mb-1.5 block text-label1 font-medium text-grey-9">아이콘 URL (선택)</label>
-          <input v-model="form.iconUrl" type="text" placeholder="https://..." :class="inputClass" />
-        </div>
         <div>
           <label class="mb-1.5 block text-label1 font-medium text-grey-9">축하 제목 (선택)</label>
           <input v-model="form.congratsTitle" type="text" placeholder="축하 제목" :class="inputClass" />
