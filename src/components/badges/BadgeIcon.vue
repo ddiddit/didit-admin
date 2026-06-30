@@ -28,7 +28,7 @@ watch(src, () => {
 
 <template>
   <span
-    class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-grey-2"
+    class="inline-flex shrink-0 items-center justify-center"
     :style="{ width: `${size}px`, height: `${size}px` }"
   >
     <img
