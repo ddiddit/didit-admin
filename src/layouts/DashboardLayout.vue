@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import {
   PenSquare, Palette, Code2, User, Menu, X,
   Bell, FileText, MessageSquare, Users, Settings, LayoutDashboard, Award, SlidersHorizontal,
-  BarChart2, ClipboardList, LineChart,
+  BarChart2, BarChart3, ClipboardList, LineChart,
 } from 'lucide-vue-next'
 import { authApi } from '@/api/auth.api'
 import { tokenStorage } from '@/utils/token'
@@ -123,6 +123,9 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
             <RouterLink to="/retrospective-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <LineChart class="w-4 h-4 flex-shrink-0" />회고 통계
             </RouterLink>
+            <RouterLink to="/stats/achievements" :class="NAV_LINK" :active-class="NAV_ACTIVE">
+              <BarChart3 class="w-4 h-4 flex-shrink-0" />운영 통계
+            </RouterLink>
             <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE">
               <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
             </RouterLink>
@@ -238,6 +241,9 @@ const NAV_ACTIVE = 'bg-green-light text-green-dark font-semibold'
           <div class="space-y-0.5">
             <RouterLink to="/retrospective-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <LineChart class="w-4 h-4 flex-shrink-0" />회고 통계
+            </RouterLink>
+            <RouterLink to="/stats/achievements" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
+              <BarChart3 class="w-4 h-4 flex-shrink-0" />운영 통계
             </RouterLink>
             <RouterLink to="/withdrawal-stats" :class="NAV_LINK" :active-class="NAV_ACTIVE" @click="closeSidebar">
               <BarChart2 class="w-4 h-4 flex-shrink-0" />탈퇴 통계
