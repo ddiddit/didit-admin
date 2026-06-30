@@ -122,7 +122,6 @@ onMounted(fetchStats)
               <tr>
                 <th class="whitespace-nowrap px-3 py-2.5 text-left font-medium">배지명</th>
                 <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">카테고리</th>
-                <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">조건</th>
                 <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">상태</th>
                 <th class="whitespace-nowrap px-3 py-2.5 text-center font-medium">획득 수</th>
               </tr>
@@ -133,7 +132,6 @@ onMounted(fetchStats)
                 <td class="whitespace-nowrap px-3 py-2.5 text-center">
                   <Badge tone="blue">{{ categoryLabel(b.category) }}</Badge>
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-center text-caption1 text-grey-7">{{ b.conditionType }}</td>
                 <td class="whitespace-nowrap px-3 py-2.5 text-center">
                   <Badge :tone="b.active ? 'green' : 'grey'">{{ b.active ? '활성' : '비활성' }}</Badge>
                 </td>

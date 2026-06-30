@@ -7,6 +7,7 @@ import BaseSpinner from '@/components/common/BaseSpinner.vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import Badge from '@/components/common/Badge.vue'
+import BadgeIcon from '@/components/badges/BadgeIcon.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import SelectField from '@/components/common/SelectField.vue'
@@ -55,13 +56,11 @@ const showToggleDialog = ref(false)
 const toggleTarget = ref<BadgeType | null>(null)
 
 const columns = [
-  { key: 'name', label: '배지명', align: 'left' as const, width: '22%' },
-  { key: 'category', label: '카테고리', align: 'center' as const, width: '14%' },
-  { key: 'conditionType', label: '조건', align: 'center' as const, width: '20%', hideBelow: 'md' as const },
-  { key: 'threshold', label: '기준값', align: 'center' as const, width: '10%', hideBelow: 'md' as const },
-  { key: 'active', label: '상태', align: 'center' as const, width: '12%' },
-  { key: 'acquiredCount', label: '획득 수', align: 'center' as const, width: '10%' },
-  { key: 'action', label: '액션', align: 'center' as const, width: '12%' },
+  { key: 'icon', label: '배지', align: 'center' as const, width: '10%' },
+  { key: 'name', label: '배지명', align: 'left' as const, width: '30%' },
+  { key: 'category', label: '카테고리', align: 'center' as const, width: '20%' },
+  { key: 'acquiredCount', label: '획득 수', align: 'center' as const, width: '18%' },
+  { key: 'action', label: '액션', align: 'center' as const, width: '22%' },
 ]
 
 const categoryOptions = computed(() =>
@@ -79,8 +78,6 @@ const conditionParams = computed(() => selectedConditionType.value?.params ?? []
 
 const categoryLabel = (category: string) =>
   conditionMeta.value?.categories.find((c) => c.category === category)?.label ?? category
-const conditionLabel = (type: string) =>
-  conditionMeta.value?.conditionTypes.find((c) => c.conditionType === type)?.label ?? type
 
 const fetchBadges = async () => {
   isLoading.value = true
@@ -281,25 +278,26 @@ onMounted(async () => {
         :columns="columns"
         :rows="badges"
         row-key="id"
-        min-width="min-w-[720px]"
+        min-width="min-w-[680px]"
         :loading="isLoading"
         empty-message="배지가 없습니다."
         :empty-icon="Award"
       >
+        <template #cell-icon="{ row }">
+          <div class="flex justify-center">
+            <BadgeIcon
+              :name="row.name"
+              :condition-type="row.conditionType"
+              :icon-url="row.iconUrl"
+              :size="40"
+            />
+          </div>
+        </template>
         <template #cell-name="{ row }">
           <span class="font-medium">{{ row.name }}</span>
         </template>
         <template #cell-category="{ row }">
           <Badge tone="blue">{{ categoryLabel(row.category) }}</Badge>
-        </template>
-        <template #cell-conditionType="{ row }">
-          <Badge tone="grey">{{ conditionLabel(row.conditionType) }}</Badge>
-        </template>
-        <template #cell-threshold="{ row }">
-          <span class="text-caption1 text-grey-7">{{ formatNumber(row.threshold) }}</span>
-        </template>
-        <template #cell-active="{ row }">
-          <Badge :tone="row.active ? 'green' : 'grey'">{{ row.active ? '활성' : '비활성' }}</Badge>
         </template>
         <template #cell-acquiredCount="{ row }">
           <span class="font-semibold">{{ formatNumber(row.acquiredCount) }}</span>
@@ -332,6 +330,15 @@ onMounted(async () => {
       @close="showFormModal = false"
     >
       <div class="space-y-4">
+        <!-- 배지 아이콘 미리보기 (이름·조건으로 매칭) -->
+        <div class="flex flex-col items-center pb-1">
+          <BadgeIcon
+            :name="form.name"
+            :condition-type="form.conditionType"
+            :icon-url="form.iconUrl"
+            :size="88"
+          />
+        </div>
         <div>
           <label class="mb-1.5 block text-label1 font-medium text-grey-9">배지명</label>
           <input v-model="form.name" type="text" placeholder="배지명을 입력해주세요" :class="inputClass" />
@@ -383,10 +390,6 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div>
-          <label class="mb-1.5 block text-label1 font-medium text-grey-9">아이콘 URL (선택)</label>
-          <input v-model="form.iconUrl" type="text" placeholder="https://..." :class="inputClass" />
-        </div>
         <div>
           <label class="mb-1.5 block text-label1 font-medium text-grey-9">축하 제목 (선택)</label>
           <input v-model="form.congratsTitle" type="text" placeholder="축하 제목" :class="inputClass" />
