@@ -17,14 +17,16 @@ const missions = ref<MissionStat[]>([])
 const badgeStats = ref<BadgeStat[]>([])
 const isLoading = ref(false)
 
-// 레벨 1~10 막대 — 응답에 없는 레벨은 0으로 채운다.
+// 레벨 0(신규)~10 막대 — 응답에 없는 레벨은 0으로 채운다.
+// Lv.0은 아직 레벨이 부여되지 않은 신규 유저를 의미한다.
 const levelBars = computed(() => {
   const map = new Map(levels.value.map((l) => [l.level, l.userCount]))
-  const rows = [] as { level: number; userCount: number; percentage: number }[]
+  const rows = [] as { level: number; label: string; userCount: number; percentage: number }[]
   const max = Math.max(...levels.value.map((l) => l.userCount), 1)
-  for (let lv = 1; lv <= 10; lv++) {
+  for (let lv = 0; lv <= 10; lv++) {
     const userCount = map.get(lv) ?? 0
-    rows.push({ level: lv, userCount, percentage: (userCount / max) * 100 })
+    const label = lv === 0 ? '신규' : `Lv.${lv}`
+    rows.push({ level: lv, label, userCount, percentage: (userCount / max) * 100 })
   }
   return rows
 })
@@ -71,7 +73,7 @@ onMounted(fetchStats)
         <EmptyState v-if="!isLoading && levels.length === 0" message="레벨 데이터가 없습니다." />
         <ul v-else class="space-y-2.5">
           <li v-for="bar in levelBars" :key="bar.level" class="flex items-center gap-3">
-            <span class="w-12 shrink-0 text-caption1 text-grey-7">Lv.{{ bar.level }}</span>
+            <span class="w-12 shrink-0 text-caption1 text-grey-7">{{ bar.label }}</span>
             <div class="h-3 flex-1 overflow-hidden rounded-full bg-grey-4">
               <div class="h-full rounded-full bg-primary transition-all" :style="{ width: `${bar.percentage}%` }" />
             </div>
