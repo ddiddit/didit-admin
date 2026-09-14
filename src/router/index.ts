@@ -136,6 +136,12 @@ const router = createRouter({
             component: AuditLogsPage,
             meta: { requiresAuth: true },
         },
+        {
+            path: '/tests/retrospective',
+            name: 'retrospective-test',
+            component: () => import('@/views/tests/RetrospectiveTestPage.vue'),
+            meta: { requiresAuth: true },
+        },
     ],
 })
 
