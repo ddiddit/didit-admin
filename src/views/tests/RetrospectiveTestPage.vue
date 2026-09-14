@@ -212,7 +212,7 @@ onUnmounted(() => activeRequest?.abort())
           </fieldset>
         </Card>
 
-        <Card :padded="false" class="flex min-h-[620px] flex-col overflow-hidden">
+        <Card :padded="false" class="flex h-[620px] flex-col overflow-hidden">
           <div class="border-b border-grey-5 px-5 py-4">
             <h3 class="text-body3 font-semibold text-grey-13">V2 회고 대화</h3>
             <p class="mt-0.5 text-caption1 text-grey-7">
@@ -220,7 +220,7 @@ onUnmounted(() => activeRequest?.abort())
             </p>
           </div>
 
-          <div ref="messageList" class="flex-1 space-y-4 overflow-y-auto bg-grey-3/60 p-5">
+          <div ref="messageList" class="min-h-0 flex-1 space-y-4 overflow-y-auto bg-grey-3/60 p-5">
             <div v-if="!state" class="flex h-full min-h-[380px] items-center justify-center text-center">
               <div>
                 <p class="text-body3 font-medium text-grey-9">아직 대화가 없습니다.</p>
