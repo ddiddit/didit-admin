@@ -12,6 +12,7 @@ import { promptsApi } from '@/api/prompts.api'
 import type { Prompt } from '@/types/prompt'
 import { formatDateTime } from '@/utils/format'
 import { getErrorMessage } from '@/utils/error'
+import { getPromptTypeLabel } from '@/utils/prompt'
 
 const route = useRoute()
 const router = useRouter()
@@ -28,8 +29,6 @@ const jobLabel = (jobType: string) => {
   const map: Record<string, string> = { DEVELOPER: '개발자', PLANNER: '기획자', DESIGNER: '디자이너' }
   return map[jobType] ?? jobType
 }
-const typeLabel = (promptType: string) => (promptType === 'DEEP_QUESTION' ? '심화 질문' : '회고 요약')
-
 const fetchPrompt = async () => {
   isLoading.value = true
   try {
@@ -73,7 +72,7 @@ onMounted(fetchPrompt)
         <!-- 헤더 -->
         <div>
           <div class="flex flex-wrap items-center gap-2">
-            <Badge tone="green">{{ typeLabel(prompt.promptType) }}</Badge>
+            <Badge tone="green">{{ getPromptTypeLabel(prompt.promptType) }}</Badge>
             <h2 class="text-heading2 font-semibold text-grey-13">{{ jobLabel(prompt.jobType) }} 프롬프트</h2>
           </div>
           <p class="mt-1 text-caption1 text-grey-7">마지막 수정: {{ formatDateTime(prompt.updatedAt) }}</p>

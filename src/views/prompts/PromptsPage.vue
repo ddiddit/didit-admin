@@ -12,6 +12,7 @@ import { promptsApi } from '@/api/prompts.api'
 import type { Prompt } from '@/types/prompt'
 import { formatDateTime } from '@/utils/format'
 import { getErrorMessage } from '@/utils/error'
+import { getPromptOrder, getPromptTypeLabel } from '@/utils/prompt'
 
 const router = useRouter()
 const prompts = ref<Prompt[]>([])
@@ -21,18 +22,11 @@ const jobLabel = (jobType: string) => {
   const map: Record<string, string> = { DEVELOPER: '개발자', PLANNER: '기획자', DESIGNER: '디자이너' }
   return map[jobType] ?? jobType
 }
-const typeLabel = (promptType: string) => (promptType === 'DEEP_QUESTION' ? '심화 질문' : '회고 요약')
 const typeTone = (promptType: string): 'green' | 'grey' => (promptType === 'DEEP_QUESTION' ? 'green' : 'grey')
 
-const ORDER: Record<string, number> = {
-  DEVELOPER_DEEP_QUESTION: 0, DEVELOPER_SUMMARY: 1,
-  PLANNER_DEEP_QUESTION: 2, PLANNER_SUMMARY: 3,
-  DESIGNER_DEEP_QUESTION: 4, DESIGNER_SUMMARY: 5,
-}
-
 const sortedPrompts = computed(() =>
-  [...prompts.value].sort((a, b) =>
-    (ORDER[`${a.jobType}_${a.promptType}`] ?? 99) - (ORDER[`${b.jobType}_${b.promptType}`] ?? 99)
+  [...prompts.value].sort(
+    (a, b) => getPromptOrder(a.jobType, a.promptType) - getPromptOrder(b.jobType, b.promptType),
   )
 )
 
@@ -67,7 +61,7 @@ onMounted(fetchPrompts)
         >
           <div class="flex items-start justify-between gap-2">
             <div class="space-y-1.5">
-              <Badge :tone="typeTone(prompt.promptType)">{{ typeLabel(prompt.promptType) }}</Badge>
+              <Badge :tone="typeTone(prompt.promptType)">{{ getPromptTypeLabel(prompt.promptType) }}</Badge>
               <h3 class="text-body3 font-semibold text-grey-13">{{ jobLabel(prompt.jobType) }}</h3>
             </div>
             <ChevronRight class="mt-1 h-4 w-4 shrink-0 text-grey-6 transition group-hover:text-primary" />
