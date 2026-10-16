@@ -9,8 +9,10 @@ import Card from '@/components/common/Card.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { retrospectiveStatsApi } from '@/api/retrospectiveStats.api'
 import { dashboardApi } from '@/api/dashboard.api'
+import { analyticsApi } from '@/api/analytics.api'
 import type { RetrospectiveStats, DailyRetroCount } from '@/types/retrospectiveStats'
 import type { DashboardStats } from '@/types/dashboard'
+import type { AdminAnalytics } from '@/types/analytics'
 import { formatNumber } from '@/utils/format'
 import { estimateTokenCost, formatWon } from '@/utils/pricing'
 import { getErrorMessage } from '@/utils/error'
@@ -18,6 +20,27 @@ import { getErrorMessage } from '@/utils/error'
 const stats = ref<RetrospectiveStats | null>(null)
 const dash = ref<DashboardStats | null>(null) // 토큰/비용 출처 (전역 누적)
 const isLoading = ref(false)
+const analytics = ref<AdminAnalytics | null>(null)
+const amplitudeDashboardUrl = import.meta.env.VITE_AMPLITUDE_DASHBOARD_URL
+const today = new Date()
+const thirtyDaysAgo = new Date(today)
+thirtyDaysAgo.setDate(today.getDate() - 29)
+const toDateInput = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+const fromDate = ref(toDateInput(thirtyDaysAgo))
+const toDate = ref(toDateInput(today))
+const canQuery = computed(() => Boolean(fromDate.value && toDate.value && fromDate.value <= toDate.value))
+
+const setRecentRange = (days: number) => {
+  const from = new Date(today)
+  from.setDate(today.getDate() - (days - 1))
+  fromDate.value = toDateInput(from)
+  toDate.value = toDateInput(today)
+}
+
+const setSinceLaunch = () => {
+  fromDate.value = '2026-10-23'
+  toDate.value = toDateInput(today)
+}
 
 interface Metric {
   label: string
@@ -123,19 +146,37 @@ const perRetro = computed(() => {
 })
 
 const fetchStats = async () => {
+  if (!canQuery.value) return
   isLoading.value = true
-  try {
-    const [retroRes, dashRes] = await Promise.all([
-      retrospectiveStatsApi.getStats(),
-      dashboardApi.getStats(),
-    ])
+  const selectedFrom = fromDate.value
+  const selectedTo = toDate.value
+  analytics.value = null
+
+  const legacyStatsRequest = Promise.all([
+    retrospectiveStatsApi.getStats(),
+    dashboardApi.getStats(),
+  ]).then(([retroRes, dashRes]) => {
     stats.value = retroRes.data.data
     dash.value = dashRes.data.data
-  } catch (error: unknown) {
-    toast.error(getErrorMessage(error, '회고 통계를 불러오지 못했습니다.'))
-  } finally {
-    isLoading.value = false
-  }
+  }).catch((error: unknown) => {
+    toast.error(getErrorMessage(error, '기존 회고 통계를 불러오지 못했습니다.'))
+  })
+
+  const analyticsRequest = analyticsApi.get(selectedFrom, selectedTo).then((response) => {
+    analytics.value = response.data.data
+  }).catch((error: unknown) => {
+    toast.error(getErrorMessage(error, '공식 분석 지표를 불러오지 못했습니다.'))
+  })
+
+  await Promise.allSettled([legacyStatsRequest, analyticsRequest])
+  isLoading.value = false
+}
+
+const formatDuration = (seconds: number | null) => {
+  if (seconds === null) return '데이터 없음'
+  const roundedSeconds = Math.round(seconds)
+  const minutes = Math.floor(roundedSeconds / 60)
+  return `${minutes}분 ${roundedSeconds % 60}초`
 }
 
 onMounted(fetchStats)
@@ -147,6 +188,44 @@ onMounted(fetchStats)
 
     <div class="space-y-5">
       <PageHeader title="회고 통계" subtitle="회고 작성 현황과 완료율을 확인하세요." />
+
+      <a
+        v-if="amplitudeDashboardUrl"
+        :href="amplitudeDashboardUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex text-label1 font-semibold text-primary underline"
+      >
+        Amplitude 행동 분석 열기
+      </a>
+
+      <Card class="space-y-4">
+        <div class="flex flex-wrap items-end gap-3">
+          <div class="flex flex-wrap gap-2">
+            <button class="rounded-lg border border-grey-5 px-3 py-2 text-caption1" @click="setSinceLaunch">출시 이후</button>
+            <button class="rounded-lg border border-grey-5 px-3 py-2 text-caption1" @click="setRecentRange(7)">최근 7일</button>
+            <button class="rounded-lg border border-grey-5 px-3 py-2 text-caption1" @click="setRecentRange(14)">최근 14일</button>
+            <button class="rounded-lg border border-grey-5 px-3 py-2 text-caption1" @click="setRecentRange(30)">최근 30일</button>
+          </div>
+          <label class="text-caption1 text-grey-7">시작일
+            <input v-model="fromDate" type="date" class="mt-1 block rounded-lg border border-grey-5 px-3 py-2 text-label1 text-grey-13" />
+          </label>
+          <label class="text-caption1 text-grey-7">종료일
+            <input v-model="toDate" type="date" class="mt-1 block rounded-lg border border-grey-5 px-3 py-2 text-label1 text-grey-13" />
+          </label>
+          <button class="rounded-lg bg-primary px-4 py-2 text-label1 font-semibold text-grey-13 disabled:opacity-40" :disabled="!canQuery" @click="fetchStats">조회</button>
+        </div>
+        <p class="text-caption1 text-grey-7">아래 공식 지표는 고객 계정만 포함하며, 완료율은 선택 기간에 시작된 회고가 현재까지 완료됐는지 계산합니다.</p>
+        <p v-if="analytics" class="text-caption1 font-medium text-grey-9">적용 기간: {{ analytics.from }} ~ {{ analytics.to }}</p>
+        <div v-if="analytics" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div class="rounded-xl bg-grey-2 p-3"><p class="text-caption1 text-grey-7">회고 완료율</p><p class="mt-1 text-heading2 font-bold">{{ analytics.completionRate.toFixed(1) }}%</p><p class="text-caption2 text-grey-6">{{ analytics.completedCount }}/{{ analytics.retrospectiveCount }}건</p></div>
+          <div class="rounded-xl bg-grey-2 p-3"><p class="text-caption1 text-grey-7">14일 내 두 번째 완료율</p><p class="mt-1 text-heading2 font-bold">{{ analytics.secondCompletionRateWithin14Days.toFixed(1) }}%</p><p class="text-caption2 text-grey-6">성공 {{ analytics.retentionReturnedCount }}명 · 관찰 완료 {{ analytics.retentionEligibleCount }}명 · 관찰 중 {{ analytics.retentionObservingCount }}명</p></div>
+          <div class="rounded-xl bg-grey-2 p-3"><p class="text-caption1 text-grey-7">기존 가입자 복귀</p><p class="mt-1 text-heading2 font-bold">{{ analytics.returningUserCount }}명</p></div>
+          <div class="rounded-xl bg-grey-2 p-3"><p class="text-caption1 text-grey-7">신규 가입자</p><p class="mt-1 text-heading2 font-bold">{{ analytics.newUserCount }}명</p></div>
+          <div class="rounded-xl bg-grey-2 p-3"><p class="text-caption1 text-grey-7">회고당 답변 수</p><p class="mt-1 text-heading2 font-bold">평균 {{ analytics.averageAnswerCount?.toFixed(1) ?? '-' }}회</p><p class="text-caption2 text-grey-6">중앙값 {{ analytics.medianAnswerCount?.toFixed(1) ?? '-' }}회</p></div>
+          <div class="rounded-xl bg-grey-2 p-3"><p class="text-caption1 text-grey-7">완료까지 경과 시간</p><p class="mt-1 text-label1 font-bold">평균 {{ formatDuration(analytics.averageElapsedDurationSeconds) }}</p><p class="text-caption2 text-grey-6">중앙값 {{ formatDuration(analytics.medianElapsedDurationSeconds) }}</p></div>
+        </div>
+      </Card>
 
       <template v-if="stats">
         <!-- 요약 지표 -->

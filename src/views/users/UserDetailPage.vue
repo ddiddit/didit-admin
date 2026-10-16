@@ -12,7 +12,7 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { usersApi } from '@/api/users.api'
 import { tokenStorage } from '@/utils/token'
-import type { UserDetail } from '@/types/user'
+import type { UserAccountType, UserDetail } from '@/types/user'
 import { formatDateTime } from '@/utils/format'
 import { getErrorMessage } from '@/utils/error'
 
@@ -22,7 +22,10 @@ const router = useRouter()
 const userDetail = ref<UserDetail | null>(null)
 const isLoading = ref(false)
 const isWithdrawing = ref(false)
+const isChangingAccountType = ref(false)
 const showWithdrawDialog = ref(false)
+const showAccountTypeDialog = ref(false)
+const pendingAccountType = ref<UserAccountType | null>(null)
 
 const isSuperAdmin = computed(() => tokenStorage.isSuperAdmin())
 
@@ -53,6 +56,36 @@ const handleForceWithdraw = async () => {
   }
 }
 
+const handleAccountTypeChange = async (event: Event) => {
+  if (!userDetail.value) return
+  const previous = userDetail.value.profile.accountType
+  const next = (event.target as HTMLSelectElement).value as UserAccountType
+  if (previous === next) return
+
+  const select = event.target as HTMLSelectElement
+  select.value = previous
+  pendingAccountType.value = next
+  showAccountTypeDialog.value = true
+}
+
+const confirmAccountTypeChange = async () => {
+  if (!userDetail.value || !pendingAccountType.value) return
+  const next = pendingAccountType.value
+
+  isChangingAccountType.value = true
+  try {
+    await usersApi.changeAccountType(route.params.id as string, next)
+    userDetail.value.profile.accountType = next
+    showAccountTypeDialog.value = false
+    pendingAccountType.value = null
+    toast.success('계정 유형을 변경했습니다.')
+  } catch (error: unknown) {
+    toast.error(getErrorMessage(error, '계정 유형 변경에 실패했습니다.'))
+  } finally {
+    isChangingAccountType.value = false
+  }
+}
+
 const jobLabel = (job: string | null) => {
   const map: Record<string, string> = { DEVELOPER: '개발자', PLANNER: '기획자', DESIGNER: '디자이너' }
   return job ? (map[job] ?? job) : '-'
@@ -72,6 +105,7 @@ const actionLabel = (action: string) => {
   const map: Record<string, string> = {
     USER_LOGGED_IN: '로그인', USER_LOGGED_OUT: '로그아웃', USER_SIGNED_UP: '회원가입',
     USER_PROFILE_UPDATED: '프로필 수정', USER_WITHDREW: '회원 탈퇴', USER_FORCE_WITHDREW: '강제 탈퇴',
+    USER_ACCOUNT_TYPE_CHANGED: '계정 유형 변경',
     USER_MARKETING_CONSENT_UPDATED: '마케팅 수신 동의 변경',
     RETROSPECTIVE_STARTED: '회고 시작', RETROSPECTIVE_SAVED: '회고 저장',
     RETROSPECTIVE_DELETED: '회고 삭제', RETROSPECTIVE_RESTARTED: '회고 재시작',
@@ -106,7 +140,7 @@ onMounted(fetchUser)
 
 <template>
   <DashboardLayout>
-    <BaseSpinner :show="isLoading || isWithdrawing" />
+    <BaseSpinner :show="isLoading || isWithdrawing || isChangingAccountType" />
 
     <div class="mx-auto w-full max-w-6xl space-y-5 pt-2">
       <BackLink @click="router.push('/users')" />
@@ -130,6 +164,23 @@ onMounted(fetchUser)
                   <p class="mt-0.5 break-all text-label1 text-grey-13">{{ field.value }}</p>
                 </div>
               </div>
+            </Card>
+
+            <Card v-if="isSuperAdmin" class="space-y-2">
+              <div>
+                <h3 class="text-label1 font-semibold text-grey-13">통계 계정 유형</h3>
+                <p class="mt-0.5 text-caption1 text-grey-7">실사용자 통계에는 고객 계정만 포함됩니다.</p>
+              </div>
+              <select
+                class="w-full rounded-lg border border-grey-5 bg-white px-3 py-2 text-label1 text-grey-13"
+                :value="userDetail.profile.accountType"
+                :disabled="isChangingAccountType"
+                @change="handleAccountTypeChange"
+              >
+                <option value="CUSTOMER">고객</option>
+                <option value="TEAM">팀원</option>
+                <option value="TEST">테스트</option>
+              </select>
             </Card>
 
             <!-- 강제 탈퇴 (SUPER_ADMIN만) -->
@@ -181,6 +232,16 @@ onMounted(fetchUser)
         </div>
       </template>
     </div>
+
+    <ConfirmDialog
+      v-if="showAccountTypeDialog"
+      title="통계 계정 유형 변경"
+      :description="`계정 유형을 ${pendingAccountType === 'CUSTOMER' ? '고객' : pendingAccountType === 'TEAM' ? '팀원' : '테스트'}(으)로 변경하시겠습니까?\n고객이 아니면 공식 사용자 통계에서 제외됩니다.`"
+      confirm-text="변경"
+      :is-loading="isChangingAccountType"
+      @close="showAccountTypeDialog = false; pendingAccountType = null"
+      @confirm="confirmAccountTypeChange"
+    />
 
     <ConfirmDialog
       v-if="showWithdrawDialog"
