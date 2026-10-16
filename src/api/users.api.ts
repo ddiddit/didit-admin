@@ -1,6 +1,6 @@
 import client from './client'
 import type { ApiResponse } from '@/types/api'
-import type { UserDetail, UserPage } from '@/types/user'
+import type { UserAccountType, UserDetail, UserPage } from '@/types/user'
 
 interface UserListParams {
   keyword?: string
@@ -20,5 +20,9 @@ export const usersApi = {
 
   forceWithdraw(userId: string) {
     return client.post<void>(`/users/${userId}/force-withdraw`)
+  },
+
+  changeAccountType(userId: string, accountType: UserAccountType) {
+    return client.patch<void>(`/users/${userId}/account-type`, { accountType })
   },
 }
